@@ -7,6 +7,43 @@
 // Task storage
 let tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
 
+// ==========================================
+// AUTHENTICATION FUNCTIONS
+// ==========================================
+
+/**
+ * Get current session
+ */
+function getCurrentSession() {
+    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
+           JSON.parse(sessionStorage.getItem('focusForgeSession'));
+}
+
+/**
+ * Check if user is logged in
+ */
+function isLoggedIn() {
+    return getCurrentSession() !== null;
+}
+
+/**
+ * Redirect to login if not logged in
+ */
+function requireAuth() {
+    if (!isLoggedIn()) {
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * Logout user
+ */
+function logoutUser() {
+    localStorage.removeItem('focusForgeSession');
+    sessionStorage.removeItem('focusForgeSession');
+    window.location.href = 'login.html';
+}
+
 // App State
 const state = {
     timerTime: 25 * 60,
@@ -184,7 +221,8 @@ const elements = {
     donationBtn: document.getElementById('donationBtn'),
     donationModal: document.getElementById('donationModal'),
     donationClose: document.getElementById('donationClose'),
-    sidebarDonation: document.getElementById('sidebarDonation')
+    sidebarDonation: document.getElementById('sidebarDonation'),
+    sidebarLogout: document.getElementById('sidebarLogout')
 };
 
 // Timer Functions
@@ -543,6 +581,11 @@ function initEventListeners() {
         });
     }
     
+    // Logout button
+    if (elements.sidebarLogout) {
+        elements.sidebarLogout.addEventListener('click', logoutUser);
+    }
+    
     elements.donationClose.addEventListener('click', () => {
         elements.donationModal.classList.remove('active');
     });
@@ -556,6 +599,9 @@ function initEventListeners() {
 
 // Initialize
 async function init() {
+    // Check authentication - redirect to login if not logged in
+    requireAuth();
+    
     // Initialize intro screen first (waits for completion if first visit today)
     await initIntroScreen();
     
