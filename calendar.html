@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Focus Forge</title>
+    <link rel="icon" href="./image.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="wave-container">
+            <div class="gradient-wave wave-1"></div>
+            <div class="gradient-wave wave-2"></div>
+            <div class="gradient-wave wave-3"></div>
+            <div class="gradient-wave wave-4"></div>
+            <div class="gradient-wave wave-5"></div>
+        </div>
+        <div class="glow-spot glow-1"></div>
+        <div class="glow-spot glow-2"></div>
+        <div class="glow-spot glow-3"></div>
+    </div>
+
+    <!-- Transparent Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="./image.png" alt="Logo" class="logo-img">
+                <span>Focus Forge</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="tasks.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Tasks</span>
+            </a>
+            <a href="calendar.html" class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                </svg>
+                <span>Calendar</span>
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                <span>Analytics</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="nav-item donation-trigger" id="sidebarDonation">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                <span>Donate</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        <div class="app-container">
+            <div class="page-header">
+                <h1>Calendar</h1>
+                <p>Schedule your tasks and focus sessions</p>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="calendar-nav" id="prevMonth">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                        </svg>
+                    </button>
+                    <h2 id="currentMonth">January 2025</h2>
+                    <button class="calendar-nav" id="nextMonth">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar days will be generated here -->
+                </div>
+                
+                <div class="calendar-sidebar">
+                    <h3 id="selectedDateTitle">Select a date</h3>
+                    <div class="selected-date-tasks" id="selectedDateTasks">
+                        <p class="no-tasks">Click on a date to view tasks</p>
+                    </div>
+                    <div class="add-task-to-date">
+                        <input type="text" id="dateTaskInput" placeholder="Add task for this date...">
+                        <button id="addDateTaskBtn" class="add-date-task-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal donation-modal" id="donationModal">
+        <div class="donation-content">
+            <button class="donation-close" id="donationClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <h2>Support Focus Forge ❤️</h2>
+            <p class="donation-subtitle">Your donation helps us keep the timer running!</p>
+            <div class="qrcode-container">
+                <img src="./qr.png" alt="Donation QR Code" class="qrcode-img">
+            </div>
+            <p class="donation-thanks">Thank you for your generosity!</p>
+        </div>
+    </div>
+
+    <script src="calendar.js"></script>
+</body>
+</html>
+

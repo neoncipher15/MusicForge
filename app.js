@@ -125,6 +125,9 @@ function showTimerComplete() {
     // Play completion sound
     playSessionCompleteSound();
     
+    // Save session data for analytics
+    saveSessionData();
+    
     const notification = document.createElement('div');
     notification.className = 'complete-notification';
     notification.textContent = '⏱️ Session Complete!';
@@ -133,6 +136,19 @@ function showTimerComplete() {
     setTimeout(() => {
         notification.remove();
     }, 3000);
+}
+
+// Save session data to localStorage for analytics
+function saveSessionData() {
+    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+    const session = {
+        id: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        duration: Math.floor(state.timerTotal / 60), // in minutes
+        completedAt: new Date().toISOString()
+    };
+    sessions.push(session);
+    localStorage.setItem('focusForgeSessions', JSON.stringify(sessions));
 }
 
 // Sound Functions
