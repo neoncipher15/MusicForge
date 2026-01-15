@@ -59,28 +59,33 @@
     </aside>
 
     <div class="main-wrapper">
-        <div class="app-container">
+        <div class="app-container calendar-page-container">
             <div class="page-header">
                 <h1>Calendar</h1>
                 <p>Schedule your tasks and focus sessions</p>
             </div>
             
             <div class="calendar-container">
-                <div class="calendar-header">
-                    <button class="calendar-nav" id="prevMonth">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                        </svg>
-                    </button>
-                    <h2 id="currentMonth">January 2025</h2>
-                    <button class="calendar-nav" id="nextMonth">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="calendar-grid" id="calendarGrid">
+                <div class="calendar-main">
+                    <!-- Month Selector Above Calendar -->
+                    <div class="calendar-month-selector">
+                        <button class="calendar-nav" id="prevMonth">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                            </svg>
+                        </button>
+                        <h2 id="currentMonth">January 2025</h2>
+                        <button class="calendar-nav" id="nextMonth">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="calendar-scroll-wrapper">
+                        <div class="calendar-grid" id="calendarGrid">
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="calendar-sidebar">
