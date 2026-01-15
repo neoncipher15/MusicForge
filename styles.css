@@ -59,14 +59,14 @@ body {
 }
 
 /* Subtle glow orbs for intro */
-.intro-overlay .glow-orb {
+.intro-glow-orb {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
     opacity: 0.3;
 }
 
-.intro-overlay .glow-orb-1 {
+.intro-glow-orb.glow-orb-1 {
     width: 500px;
     height: 500px;
     background: #2a1f4e;
@@ -75,7 +75,7 @@ body {
     animation: float1 25s ease-in-out infinite;
 }
 
-.intro-overlay .glow-orb-2 {
+.intro-glow-orb.glow-orb-2 {
     width: 400px;
     height: 400px;
     background: #1f2a3a;
