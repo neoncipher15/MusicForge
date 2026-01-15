@@ -503,25 +503,41 @@ body {
 }
 
 /* Calendar Page */
+.calendar-page-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
 .calendar-container {
-    display: grid;
-    grid-template-columns: 1fr 320px;
+    display: flex;
     gap: 2rem;
     width: 100%;
-    max-width: 1100px;
+    overflow: hidden;
 }
 
-.calendar-header {
+.calendar-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.calendar-month-selector {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 1.5rem;
     margin-bottom: 1.5rem;
+    flex-shrink: 0;
 }
 
-.calendar-header h2 {
+.calendar-month-selector h2 {
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 600;
+    min-width: 200px;
+    text-align: center;
 }
 
 .calendar-nav {
@@ -536,6 +552,7 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .calendar-nav:hover {
@@ -548,15 +565,41 @@ body {
     height: 24px;
 }
 
-.calendar-grid {
+.calendar-scroll-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100vh - 300px);
+    border-radius: 1.5rem;
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 1.5rem;
     padding: 1.5rem;
+}
+
+.calendar-scroll-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.calendar-scroll-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.calendar-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.calendar-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 0.5rem;
+    width: 100%;
 }
 
 .calendar-day-header {
@@ -567,26 +610,35 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0.5rem;
+    flex-shrink: 0;
 }
 
 .calendar-day {
     aspect-ratio: 1;
+    max-height: 80px;
+    min-height: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid transparent;
+    overflow: hidden;
 }
 
 .calendar-day:hover {
     background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .calendar-day.empty {
+    background: transparent;
     cursor: default;
+    border: none;
 }
 
 .calendar-day.empty:hover {
@@ -595,6 +647,7 @@ body {
 
 .calendar-day.today {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
 .calendar-day.selected {
@@ -610,18 +663,22 @@ body {
     color: white;
     font-size: 1rem;
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 .task-indicator {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 50%;
     position: absolute;
-    bottom: 8px;
+    bottom: 6px;
+    flex-shrink: 0;
 }
 
 .calendar-sidebar {
+    width: 320px;
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -629,18 +686,22 @@ body {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    max-height: calc(100vh - 250px);
+    overflow: hidden;
 }
 
 .calendar-sidebar h3 {
     color: white;
     font-size: 1.125rem;
     margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 .selected-date-tasks {
     flex: 1;
     overflow-y: auto;
     margin-bottom: 1rem;
+    min-height: 100px;
 }
 
 .no-tasks {
@@ -697,6 +758,7 @@ body {
     flex: 1;
     color: white;
     font-size: 0.875rem;
+    word-break: break-word;
 }
 
 .scheduled-task .task-delete {
@@ -727,6 +789,7 @@ body {
 .add-task-to-date {
     display: flex;
     gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .add-task-to-date input {
@@ -761,6 +824,7 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .add-date-task-btn:hover {
@@ -1640,11 +1704,22 @@ body {
     
     /* Calendar mobile */
     .calendar-container {
-        grid-template-columns: 1fr;
+        flex-direction: column;
     }
     
     .calendar-sidebar {
         order: -1;
+        width: 100%;
+        max-height: 300px;
+    }
+    
+    .calendar-scroll-wrapper {
+        max-height: 400px;
+    }
+    
+    .calendar-month-selector h2 {
+        font-size: 1.25rem;
+        min-width: 150px;
     }
     
     /* Tasks mobile */
