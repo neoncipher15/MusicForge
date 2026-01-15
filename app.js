@@ -1,7 +1,7 @@
 
 /**
  * Focus Forge - Master Your Focus
- * Timer + Task Management with Ambient Audio
+ * Timer + Task Management
  */
 
 // Task storage
@@ -13,19 +13,7 @@ const state = {
     timerTotal: 25 * 60,
     timerInterval: null,
     isTimerRunning: false,
-    currentCategory: 'focus',
-    volume: 0.5,
-    audioContext: null,
-    audioNodes: []
-};
-
-// Category sound configurations
-const CATEGORY_CONFIGS = {
-    'focus': { baseFreq: 110, beatFreq: 7, noiseType: null },
-    'relax': { baseFreq: 130.81, beatFreq: 6, noiseType: 'pink' },
-    'sleep': { baseFreq: 98, beatFreq: 2, noiseType: 'brown' },
-    'meditate': { baseFreq: 146.83, beatFreq: 5, noiseType: 'pink' },
-    'power': { baseFreq: 87.31, beatFreq: 3, noiseType: 'brown' }
+    volume: 0.5
 };
 
 // DOM Elements
@@ -37,7 +25,6 @@ const elements = {
     playBtn: document.getElementById('playBtn'),
     playIcon: document.querySelector('.play-icon'),
     pauseIcon: document.querySelector('.pause-icon'),
-    categories: document.querySelectorAll('.category'),
     presetBtns: document.querySelectorAll('.preset-btn'),
     taskInput: document.getElementById('taskInput'),
     addTaskBtn: document.getElementById('addTaskBtn'),
@@ -52,163 +39,6 @@ const elements = {
     cancelTimer: document.getElementById('cancelTimer'),
     setTimer: document.getElementById('setTimer')
 };
-
-// Initialize Audio Context
-function initAudioContext() {
-    if (!state.audioContext) {
-        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        state.masterGain = state.audioContext.createGain();
-        state.masterGain.gain.value = state.volume;
-        state.masterGain.connect(state.audioContext.destination);
-    }
-    if (state.audioContext.state === 'suspended') {
-        state.audioContext.resume();
-    }
-}
-
-// Generate noise buffers
-function createPinkNoise() {
-    const bufferSize = 4 * state.audioContext.sampleRate;
-    const buffer = state.audioContext.createBuffer(1, bufferSize, state.audioContext.sampleRate);
-    const data = buffer.getChannelData(0);
-    
-    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-    
-    for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        b0 = 0.99886 * b0 + white * 0.0555179;
-        b1 = 0.99332 * b1 + white * 0.0750759;
-        b2 = 0.96900 * b2 + white * 0.1538520;
-        b3 = 0.86650 * b3 + white * 0.3104856;
-        b4 = 0.55000 * b4 + white * 0.5329522;
-        b5 = -0.7616 * b5 - white * 0.0168980;
-        data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-        data[i] *= 0.11;
-        b6 = white * 0.115926;
-    }
-    
-    return buffer;
-}
-
-function createBrownNoise() {
-    const bufferSize = 4 * state.audioContext.sampleRate;
-    const buffer = state.audioContext.createBuffer(1, bufferSize, state.audioContext.sampleRate);
-    const data = buffer.getChannelData(0);
-    
-    let lastOut = 0;
-    
-    for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        data[i] = (lastOut + (0.02 * white)) / 1.02;
-        lastOut = data[i];
-        data[i] *= 3.5;
-    }
-    
-    return buffer;
-}
-
-// Create ambient audio
-function createAmbientAudio(category) {
-    initAudioContext();
-    
-    const config = CATEGORY_CONFIGS[category];
-    const nodes = [];
-    
-    // Binaural beat oscillators
-    const osc1 = state.audioContext.createOscillator();
-    const osc2 = state.audioContext.createOscillator();
-    const gain1 = state.audioContext.createGain();
-    const gain2 = state.audioContext.createGain();
-    const panner1 = state.audioContext.createStereoPanner();
-    const panner2 = state.audioContext.createStereoPanner();
-    
-    osc1.frequency.value = config.baseFreq;
-    osc2.frequency.value = config.baseFreq + config.beatFreq;
-    osc1.type = 'sine';
-    osc2.type = 'sine';
-    
-    panner1.pan.value = -1;
-    panner2.pan.value = 1;
-    gain1.gain.value = 0.15;
-    gain2.gain.value = 0.15;
-    
-    osc1.connect(gain1);
-    gain1.connect(panner1);
-    panner1.connect(state.masterGain);
-    
-    osc2.connect(gain2);
-    gain2.connect(panner2);
-    panner2.connect(state.masterGain);
-    
-    osc1.start();
-    osc2.start();
-    
-    nodes.push(osc1, osc2, gain1, gain2, panner1, panner2);
-    
-    // Harmonic
-    const harmonic = state.audioContext.createOscillator();
-    const harmonicGain = state.audioContext.createGain();
-    
-    harmonic.frequency.value = config.baseFreq * 2;
-    harmonic.type = 'sine';
-    harmonicGain.gain.value = 0.05;
-    
-    harmonic.connect(harmonicGain);
-    harmonicGain.connect(state.masterGain);
-    harmonic.start();
-    
-    nodes.push(harmonic, harmonicGain);
-    
-    // Noise if configured
-    if (config.noiseType) {
-        const noiseBuffer = config.noiseType === 'brown' ? createBrownNoise() : createPinkNoise();
-        const noiseSource = state.audioContext.createBufferSource();
-        const noiseGain = state.audioContext.createGain();
-        const noiseFilter = state.audioContext.createBiquadFilter();
-        
-        noiseSource.buffer = noiseBuffer;
-        noiseSource.loop = true;
-        noiseFilter.type = 'lowpass';
-        noiseFilter.frequency.value = config.noiseType === 'brown' ? 400 : 600;
-        noiseGain.gain.value = config.noiseType === 'brown' ? 0.1 : 0.08;
-        
-        noiseSource.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(state.masterGain);
-        
-        noiseSource.start();
-        
-        nodes.push(noiseSource, noiseFilter, noiseGain);
-    }
-    
-    return nodes;
-}
-
-function startAudio() {
-    if (state.audioNodes.length > 0) return;
-    state.audioNodes = createAmbientAudio(state.currentCategory);
-    
-    const startTime = state.audioContext.currentTime;
-    state.masterGain.gain.setValueAtTime(0, startTime);
-    state.masterGain.gain.linearRampToValueAtTime(state.volume, startTime + 2);
-}
-
-function stopAudio() {
-    if (state.audioNodes.length > 0) {
-        const startTime = state.audioContext.currentTime;
-        state.masterGain.gain.linearRampToValueAtTime(0, startTime + 1);
-        
-        setTimeout(() => {
-            state.audioNodes.forEach(node => {
-                try {
-                    if (node.stop) node.stop();
-                    if (node.disconnect) node.disconnect();
-                } catch (e) {}
-            });
-            state.audioNodes = [];
-        }, 1100);
-    }
-}
 
 // Timer Functions
 function updateTimerDisplay() {
@@ -236,7 +66,6 @@ function startTimer() {
             // Timer complete
             clearInterval(state.timerInterval);
             state.isTimerRunning = false;
-            stopAudio();
             updatePlayButton();
             showTimerComplete();
         }
@@ -265,11 +94,9 @@ function toggleTimer() {
     if (state.isTimerRunning) {
         // Stop
         stopTimer();
-        stopAudio();
         state.isTimerRunning = false;
     } else {
         // Start
-        startAudio();
         startTimer();
         state.isTimerRunning = true;
     }
@@ -294,7 +121,7 @@ function showTimerComplete() {
     
     setTimeout(() => {
         notification.remove();
-    }, 4000);
+    }, 3000);
 }
 
 // Task Functions
@@ -364,24 +191,6 @@ function deleteTask(index) {
 function initEventListeners() {
     // Play/Pause
     elements.playBtn.addEventListener('click', toggleTimer);
-    
-    // Category selection
-    elements.categories.forEach(cat => {
-        cat.addEventListener('click', () => {
-            const category = cat.dataset.category;
-            
-            // Update active state
-            elements.categories.forEach(c => c.classList.remove('active'));
-            cat.classList.add('active');
-            
-            // Update audio
-            state.currentCategory = category;
-            if (state.isTimerRunning) {
-                stopAudio();
-                startAudio();
-            }
-        });
-    });
     
     // Preset buttons
     elements.presetBtns.forEach(btn => {
@@ -460,12 +269,9 @@ function initEventListeners() {
         }
     });
     
-    // Volume
+    // Volume (placeholder - can be used for future features)
     elements.volumeSlider.addEventListener('input', (e) => {
         state.volume = e.target.value / 100;
-        if (state.masterGain) {
-            state.masterGain.gain.value = state.volume;
-        }
     });
     
     // Keyboard shortcuts
