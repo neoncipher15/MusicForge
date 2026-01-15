@@ -13,7 +13,8 @@ const state = {
     timerTotal: 25 * 60,
     timerInterval: null,
     isTimerRunning: false,
-    volume: 0.5
+    volume: 0.5,
+    soundEnabled: JSON.parse(localStorage.getItem('focusForgeSound')) !== false
 };
 
 // DOM Elements
@@ -25,6 +26,10 @@ const elements = {
     playBtn: document.getElementById('playBtn'),
     playIcon: document.querySelector('.play-icon'),
     pauseIcon: document.querySelector('.pause-icon'),
+    resetBtn: document.getElementById('resetBtn'),
+    soundBtn: document.getElementById('soundBtn'),
+    soundOn: document.querySelector('.sound-on'),
+    soundOff: document.querySelector('.sound-off'),
     presetBtns: document.querySelectorAll('.preset-btn'),
     taskInput: document.getElementById('taskInput'),
     addTaskBtn: document.getElementById('addTaskBtn'),
@@ -116,6 +121,9 @@ function updatePlayButton() {
 }
 
 function showTimerComplete() {
+    // Play completion sound
+    playSessionCompleteSound();
+    
     const notification = document.createElement('div');
     notification.className = 'complete-notification';
     notification.textContent = '⏱️ Session Complete!';
@@ -124,6 +132,78 @@ function showTimerComplete() {
     setTimeout(() => {
         notification.remove();
     }, 3000);
+}
+
+// Sound Functions
+function playSessionCompleteSound() {
+    if (!state.soundEnabled) return;
+    
+    // Create audio context
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    
+    const audioCtx = new AudioContext();
+    
+    // Create a pleasant chime with multiple harmonics
+    const now = audioCtx.currentTime;
+    
+    // Main tone - C5 note
+    const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    
+    frequencies.forEach((freq, index) => {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(freq, now);
+        
+        // Staggered envelope for each note
+        const startTime = now + index * 0.15;
+        const attackTime = 0.05;
+        const decayTime = 1.5;
+        const sustainLevel = 0.1;
+        const releaseTime = 1.0;
+        
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, startTime + attackTime);
+        gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attackTime + decayTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + attackTime + decayTime + releaseTime);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + attackTime + decayTime + releaseTime + 0.1);
+    });
+}
+
+function toggleSound() {
+    state.soundEnabled = !state.soundEnabled;
+    localStorage.setItem('focusForgeSound', state.soundEnabled);
+    updateSoundButton();
+}
+
+function resetTimer() {
+    stopTimer();
+    state.isTimerRunning = false;
+    state.timerTime = state.timerTotal;
+    updateTimerDisplay();
+    updateTimerRing();
+    updatePlayButton();
+}
+
+function updateSoundButton() {
+    if (elements.soundBtn) {
+        if (state.soundEnabled) {
+            elements.soundBtn.classList.remove('muted');
+            elements.soundOn.style.display = 'block';
+            elements.soundOff.style.display = 'none';
+        } else {
+            elements.soundBtn.classList.add('muted');
+            elements.soundOn.style.display = 'none';
+            elements.soundOff.style.display = 'block';
+        }
+    }
 }
 
 // Task Functions
@@ -193,6 +273,16 @@ function deleteTask(index) {
 function initEventListeners() {
     // Play/Pause
     elements.playBtn.addEventListener('click', toggleTimer);
+    
+    // Reset timer
+    if (elements.resetBtn) {
+        elements.resetBtn.addEventListener('click', resetTimer);
+    }
+    
+    // Sound toggle
+    if (elements.soundBtn) {
+        elements.soundBtn.addEventListener('click', toggleSound);
+    }
     
     // Preset buttons
     elements.presetBtns.forEach(btn => {
@@ -307,6 +397,7 @@ function init() {
     updateTimerDisplay();
     updateTimerRing();
     renderTasks();
+    updateSoundButton();
 }
 
 // Start

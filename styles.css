@@ -11,7 +11,7 @@ body {
     background: #0a0a0f;
 }
 
-/* Animated Gradient Background */
+/* Animated Gradient Background - Brain.fm Style */
 .animated-bg {
     position: fixed;
     top: 0;
@@ -20,56 +20,163 @@ body {
     height: 100%;
     z-index: -1;
     overflow: hidden;
+    background: #0a0a0f;
 }
 
-.gradient-orb {
+/* Flowing gradient waves */
+.wave-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.gradient-wave {
+    position: absolute;
+    width: 200%;
+    height: 100%;
+    opacity: 0.5;
+    filter: blur(60px);
+    animation: waveFlow 25s ease-in-out infinite;
+}
+
+.wave-1 {
+    background: linear-gradient(90deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #f093fb 50%, 
+        #764ba2 75%, 
+        #667eea 100%
+    );
+    top: 0;
+    left: -50%;
+    animation-delay: 0s;
+    mix-blend-mode: screen;
+}
+
+.wave-2 {
+    background: linear-gradient(90deg, 
+        #4facfe 0%, 
+        #00f2fe 25%, 
+        #667eea 50%, 
+        #4facfe 75%, 
+        #00f2fe 100%
+    );
+    top: 20%;
+    left: -60%;
+    animation-delay: -8s;
+    mix-blend-mode: screen;
+    animation-duration: 30s;
+}
+
+.wave-3 {
+    background: linear-gradient(90deg, 
+        #f093fb 0%, 
+        #f5576c 25%, 
+        #764ba2 50%, 
+        #f093fb 75%, 
+        #f5576c 100%
+    );
+    top: -20%;
+    left: -40%;
+    animation-delay: -16s;
+    mix-blend-mode: screen;
+    animation-duration: 35s;
+}
+
+.wave-4 {
+    background: linear-gradient(90deg, 
+        #43e97b 0%, 
+        #38f9d7 25%, 
+        #4facfe 50%, 
+        #43e97b 75%, 
+        #38f9d7 100%
+    );
+    top: 40%;
+    left: -70%;
+    animation-delay: -5s;
+    mix-blend-mode: screen;
+    animation-duration: 28s;
+}
+
+.wave-5 {
+    background: linear-gradient(90deg, 
+        #fa709a 0%, 
+        #fee140 25%, 
+        #f093fb 50%, 
+        #fa709a 75%, 
+        #fee140 100%
+    );
+    top: -10%;
+    left: -55%;
+    animation-delay: -12s;
+    mix-blend-mode: screen;
+    animation-duration: 32s;
+}
+
+@keyframes waveFlow {
+    0%, 100% {
+        transform: translateX(0) scale(1);
+    }
+    25% {
+        transform: translateX(15%) scale(1.05);
+    }
+    50% {
+        transform: translateX(0) scale(1);
+    }
+    75% {
+        transform: translateX(-15%) scale(0.95);
+    }
+}
+
+/* Ambient glow spots */
+.glow-spot {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.6;
-    animation: float 20s ease-in-out infinite;
+    filter: blur(100px);
+    opacity: 0.4;
+    animation: float 15s ease-in-out infinite;
 }
 
-.orb-1 {
-    width: 600px;
-    height: 600px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    top: -200px;
-    left: -100px;
+.glow-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #667eea 0%, transparent 70%);
+    top: 10%;
+    left: 20%;
     animation-delay: 0s;
 }
 
-.orb-2 {
+.glow-2 {
     width: 500px;
     height: 500px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    bottom: -150px;
-    right: -100px;
-    animation-delay: -7s;
+    background: radial-gradient(circle, #764ba2 0%, transparent 70%);
+    top: 50%;
+    right: 10%;
+    animation-delay: -5s;
 }
 
-.orb-3 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-delay: -14s;
+.glow-3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, #f093fb 0%, transparent 70%);
+    bottom: 10%;
+    left: 30%;
+    animation-delay: -10s;
 }
 
 @keyframes float {
     0%, 100% {
-        transform: translate(0, 0) scale(1);
+        transform: translate(0, 0) rotate(0deg);
     }
     25% {
-        transform: translate(50px, -50px) scale(1.1);
+        transform: translate(30px, -30px) rotate(5deg);
     }
     50% {
-        transform: translate(0, 50px) scale(0.9);
+        transform: translate(0, 30px) rotate(0deg);
     }
     75% {
-        transform: translate(-50px, -25px) scale(1.05);
+        transform: translate(-30px, -15px) rotate(-5deg);
     }
 }
 
@@ -231,6 +338,87 @@ body {
     color: white;
 }
 
+/* Sound Toggle Button */
+.btn-sound {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.btn-sound:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-sound.muted {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-sound svg {
+    width: 22px;
+    height: 22px;
+}
+
+.btn-sound .sound-on {
+    display: block;
+}
+
+.btn-sound .sound-off {
+    display: none;
+}
+
+.btn-sound.muted .sound-on {
+    display: none;
+}
+
+.btn-sound.muted .sound-off {
+    display: block;
+}
+
+/* Control Buttons Container */
+.control-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Reset Button */
+.btn-reset {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-reset:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-reset svg {
+    width: 22px;
+    height: 22px;
+}
+
 /* Play Button */
 .btn-play {
     width: 80px;
@@ -244,7 +432,6 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    margin-top: 0.5rem;
 }
 
 .btn-play:hover {
@@ -816,6 +1003,10 @@ body {
         margin-top: 2rem;
         width: 100%;
         justify-content: center;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
     }
 }
 
