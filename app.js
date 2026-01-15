@@ -1,45 +1,24 @@
 /**
  * MindFlow - Focus & Relax Audio
- * Uses free audio samples for lofi, ambient, jazz, violin, and piano
+ * Uses Web Audio API to generate neuroacoustic soundscapes
  */
 
-// Audio source URLs (using free creative commons sources)
-const AUDIO_SOURCES = {
-    'lofi': [
-        'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3', // Lofi study
-        'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3', // Chill lofi
-        'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0c6ff1e65.mp3'  // Relaxing lofi
-    ],
-    'ambient': [
-        'https://cdn.pixabay.com/download/audio/2021/08/09/audio_0c6a2d3473.mp3', // Ambient meditation
-        'https://cdn.pixabay.com/download/audio/2022/02/07/audio_12e164e89c.mp3', // Space ambient
-        'https://cdn.pixabay.com/download/audio/2021/11/23/audio_6c14f1f6f0.mp3'  // Atmospheric
-    ],
-    'jazz': [
-        'https://cdn.pixabay.com/download/audio/2022/05/27/audio_9108fbf07a.mp3', // Smooth jazz
-        'https://cdn.pixabay.com/download/audio/2022/03/10/audio_8f76049446.mp3', // Jazz piano
-        'https://cdn.pixabay.com/download/audio/2021/10/13/audio_7a8e46e3b2.mp3'  // Lounge jazz
-    ],
-    'violin': [
-        'https://cdn.pixabay.com/download/audio/2022/03/09/audio_c8c8a73467.mp3', // Violin ambient
-        'https://cdn.pixabay.com/download/audio/2021/09/07/audio_6b0d0e3e2f.mp3', // Classical violin
-        'https://cdn.pixabay.com/download/audio/2022/01/12/audio_1f2a3b4c5d.mp3'  // Emotional violin
-    ],
-    'piano': [
-        'https://cdn.pixabay.com/download/audio/2022/05/15/audio_6c5c4d3b2a.mp3', // Relaxing piano
-        'https://cdn.pixabay.com/download/audio/2021/08/04/audio_5a4b3c2d1e.mp3', // Peaceful piano
-        'https://cdn.pixabay.com/download/audio/2022/04/27/audio_7b8c9d0e1f.mp3'  // Soft piano
-    ]
+// Audio frequencies for different categories (binaural beats)
+const CATEGORY_FREQUENCIES = {
+    'focus': { base: 40, beat: 7 },      // Gamma waves for focus
+    'relax': { base: 200, beat: 10 },    // Alpha waves for relaxation
+    'sleep': { base: 150, beat: 2 },     // Delta waves for sleep
+    'meditate': { base: 180, beat: 6 },  // Theta waves for meditation
+    'power': { base: 220, beat: 4 }      // Deep rest
 };
 
 // App State
 const state = {
-    currentCategory: 'lofi',
+    currentCategory: 'focus',
     isPlaying: false,
-    audioElement: null,
-    timerTime: 25 * 60,
-    timerTotal: 25 * 60,
-    timerInterval: null,
+    audioContext: null,
+    oscillators: [],
+    gainNode: null,
     volume: 0.7
 };
 
@@ -50,85 +29,141 @@ const elements = {
     pauseIcon: document.querySelector('.pause-icon'),
     prevBtn: document.getElementById('prevBtn'),
     nextBtn: document.getElementById('nextBtn'),
-    timerMinutes: document.getElementById('timerMinutes'),
-    timerSeconds: document.getElementById('timerSeconds'),
-    timerRing: document.getElementById('timerRing'),
     categories: document.querySelectorAll('.category'),
-    timerBtns: document.querySelectorAll('.timer-btn')
+    volumeSlider: document.getElementById('volumeSlider')
 };
 
-// Audio System
-function playCategory(category) {
-    // Stop current audio
-    if (state.audioElement) {
-        state.audioElement.pause();
-        state.audioElement.currentTime = 0;
+// Initialize Audio Context on user interaction
+function initAudioContext() {
+    if (!state.audioContext) {
+        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        state.gainNode = state.audioContext.createGain();
+        state.gainNode.connect(state.audioContext.destination);
+        state.gainNode.gain.value = state.volume;
     }
-    
-    // Get random track from category
-    const tracks = AUDIO_SOURCES[category];
-    const trackUrl = tracks[Math.floor(Math.random() * tracks.length)];
-    
-    // Create audio element
-    state.audioElement = new Audio(trackUrl);
-    state.audioElement.loop = true;
-    state.audioElement.volume = state.volume;
-    
-    // Fade in
-    state.audioElement.volume = 0;
-    state.audioElement.play().then(() => {
-        fadeIn(state.audioElement);
-    }).catch(err => {
-        console.log('Audio playback requires user interaction');
-    });
+    if (state.audioContext.state === 'suspended') {
+        state.audioContext.resume();
+    }
 }
 
-function fadeIn(audio) {
-    const fadeInterval = setInterval(() => {
-        if (audio.volume < state.volume - 0.1) {
-            audio.volume += 0.05;
-        } else {
-            audio.volume = state.volume;
-            clearInterval(fadeInterval);
-        }
-    }, 100);
+// Generate binaural beat sound
+function playCategory(category) {
+    initAudioContext();
+    
+    // Stop any existing audio
+    stopAudio();
+    
+    const freq = CATEGORY_FREQUENCIES[category];
+    
+    // Create two oscillators for binaural beat effect
+    // Left ear
+    const osc1 = state.audioContext.createOscillator();
+    const gain1 = state.audioContext.createGain();
+    
+    // Right ear
+    const osc2 = state.audioContext.createOscillator();
+    const gain2 = state.audioContext.createGain();
+    
+    // Create stereo panner nodes
+    const panner1 = state.audioContext.createStereoPanner();
+    const panner2 = state.audioContext.createStereoPanner();
+    
+    // Set frequencies for binaural beat
+    osc1.frequency.value = freq.base;
+    osc2.frequency.value = freq.base + freq.beat;
+    
+    // Pan left and right
+    panner1.pan.value = -1;
+    panner2.pan.value = 1;
+    
+    // Use sine waves for smooth sound
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    
+    // Set volume
+    gain1.gain.value = 0.3;
+    gain2.gain.value = 0.3;
+    
+    // Add slight detuning for richness
+    osc1.detune.value = 0;
+    osc2.detune.value = 0;
+    
+    // Connect nodes
+    osc1.connect(gain1);
+    gain1.connect(panner1);
+    panner1.connect(state.gainNode);
+    
+    osc2.connect(gain2);
+    gain2.connect(panner2);
+    panner2.connect(state.gainNode);
+    
+    // Start with fade in
+    gain1.gain.setValueAtTime(0, state.audioContext.currentTime);
+    gain2.gain.setValueAtTime(0, state.audioContext.currentTime);
+    
+    gain1.gain.linearRampToValueAtTime(0.3, state.audioContext.currentTime + 2);
+    gain2.gain.linearRampToValueAtTime(0.3, state.audioContext.currentTime + 2);
+    
+    osc1.start();
+    osc2.start();
+    
+    // Store references
+    state.oscillators = [osc1, osc2, gain1, gain2];
 }
 
-function fadeOutAndStop() {
-    if (!state.audioElement) return;
+// Add subtle modulation for richness
+function addModulation() {
+    if (!state.isPlaying || state.oscillators.length < 4) return;
     
-    const audio = state.audioElement;
-    const fadeInterval = setInterval(() => {
-        if (audio.volume > 0.05) {
-            audio.volume -= 0.05;
-        } else {
-            audio.pause();
-            audio.currentTime = 0;
-            clearInterval(fadeInterval);
-        }
-    }, 100);
+    const osc1 = state.oscillators[0];
+    
+    // Slowly modulate frequency for organic feel
+    const lfo = state.audioContext.createOscillator();
+    const lfoGain = state.audioContext.createGain();
+    
+    lfo.frequency.value = 0.1; // Very slow modulation
+    lfoGain.gain.value = 2;    // Subtle frequency variation
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc1.frequency);
+    
+    lfo.start();
+    
+    state.oscillators.push(lfo, lfoGain);
 }
 
 function stopAudio() {
-    if (state.audioElement) {
-        state.audioElement.pause();
-        state.audioElement.currentTime = 0;
+    // Fade out
+    if (state.oscillators.length >= 4) {
+        const gain1 = state.oscillators[2];
+        const gain2 = state.oscillators[3];
+        
+        gain1.gain.linearRampToValueAtTime(0, state.audioContext.currentTime + 1);
+        gain2.gain.linearRampToValueAtTime(0, state.audioContext.currentTime + 1);
     }
+    
+    // Stop after fade
+    setTimeout(() => {
+        state.oscillators.forEach(osc => {
+            try {
+                if (osc.stop) osc.stop();
+                if (osc.disconnect) osc.disconnect();
+            } catch (e) {}
+        });
+        state.oscillators = [];
+    }, 1100);
 }
 
 function togglePlay() {
     if (state.isPlaying) {
         // Pause
-        if (state.audioElement) {
-            state.audioElement.pause();
-        }
-        clearInterval(state.timerInterval);
+        stopAudio();
         state.isPlaying = false;
         updatePlayButton();
     } else {
         // Play
         playCategory(state.currentCategory);
-        startTimer();
+        addModulation();
         state.isPlaying = true;
         updatePlayButton();
     }
@@ -144,61 +179,11 @@ function updatePlayButton() {
     }
 }
 
-// Timer
-function startTimer() {
-    clearInterval(state.timerInterval);
-    state.timerInterval = setInterval(() => {
-        if (state.timerTime > 0) {
-            state.timerTime--;
-            updateTimerDisplay();
-            updateTimerRing();
-        } else {
-            // Timer finished
-            clearInterval(state.timerInterval);
-            fadeOutAndStop();
-            state.isPlaying = false;
-            updatePlayButton();
-            showCompleteNotification();
-        }
-    }, 1000);
-}
-
-function updateTimerDisplay() {
-    const minutes = Math.floor(state.timerTime / 60);
-    const seconds = state.timerTime % 60;
-    elements.timerMinutes.textContent = minutes.toString().padStart(2, '0');
-    elements.timerSeconds.textContent = seconds.toString().padStart(2, '0');
-}
-
-function updateTimerRing() {
-    const circumference = 2 * Math.PI * 90;
-    const progress = (state.timerTotal - state.timerTime) / state.timerTotal;
-    const offset = circumference * (1 - progress);
-    elements.timerRing.style.strokeDashoffset = offset;
-}
-
-function setTimer(minutes) {
-    clearInterval(state.timerInterval);
-    state.timerTime = minutes * 60;
-    state.timerTotal = state.timerTime;
-    updateTimerDisplay();
-    updateTimerRing();
-    
-    // Update active button
-    elements.timerBtns.forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.dataset.time) === minutes);
-    });
-}
-
-function showCompleteNotification() {
-    const notification = document.createElement('div');
-    notification.className = 'complete-notification';
-    notification.textContent = 'Session Complete';
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+function setVolume(value) {
+    state.volume = value / 100;
+    if (state.gainNode) {
+        state.gainNode.gain.value = state.volume;
+    }
 }
 
 // Category Navigation
@@ -213,18 +198,19 @@ function setCategory(category) {
     // If playing, switch audio
     if (state.isPlaying) {
         playCategory(category);
+        addModulation();
     }
 }
 
 function nextCategory() {
-    const categories = Object.keys(AUDIO_SOURCES);
+    const categories = Object.keys(CATEGORY_FREQUENCIES);
     const currentIndex = categories.indexOf(state.currentCategory);
     const nextIndex = (currentIndex + 1) % categories.length;
     setCategory(categories[nextIndex]);
 }
 
 function prevCategory() {
-    const categories = Object.keys(AUDIO_SOURCES);
+    const categories = Object.keys(CATEGORY_FREQUENCIES);
     const currentIndex = categories.indexOf(state.currentCategory);
     const prevIndex = (currentIndex - 1 + categories.length) % categories.length;
     setCategory(categories[prevIndex]);
@@ -246,12 +232,12 @@ function initEventListeners() {
         });
     });
     
-    // Timer buttons
-    elements.timerBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            setTimer(parseInt(btn.dataset.time));
+    // Volume
+    if (elements.volumeSlider) {
+        elements.volumeSlider.addEventListener('input', (e) => {
+            setVolume(e.target.value);
         });
-    });
+    }
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
@@ -275,8 +261,6 @@ function initEventListeners() {
 // Initialize
 function init() {
     initEventListeners();
-    updateTimerDisplay();
-    updateTimerRing();
     
     // Set initial active category
     elements.categories.forEach(cat => {

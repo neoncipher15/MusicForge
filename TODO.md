@@ -1,36 +1,23 @@
+# Todo List
 
-# MindFlow - Complete Redesign
+## Fix Music & Remove Timer
 
-## ✅ Completed
+### Step 1: Update HTML (Remove Timer)
+- [x] Remove timer-display div
+- [x] Remove timer-controls div
 
-### Design
-- Clean, minimal design like brain.fm
-- Animated gradient background with floating orbs
-- Large timer display with gradient ring
-- Simple category cards (lofi, ambient, jazz, violin, piano)
-- Frosted glass effects with backdrop blur
+### Step 2: Update JavaScript (Web Audio API + No Timer)
+- [x] Replace CDN audio with Web Audio API generated sounds
+- [x] Remove timer state and functions
+- [x] Update play button to only control audio
 
-### Features
-- **5 Audio Categories**: Lofi, Ambient, Jazz, Violin, Piano
-- **Timer**: 15/25/45 min presets with animated ring
-- **Play/Pause**: Smooth fade in/out
-- **Prev/Next**: Navigate between categories
-- **Gradient Animation**: Floating animated orbs
+### Step 3: Update CSS (Remove Timer Styles)
+- [x] Remove timer-display styles
+- [x] Remove timer-controls styles
+- [x] Remove timer-ring styles
 
-### Audio
-- Uses real audio samples from Pixabay (free creative commons)
-- Random track selection from each category
-- Smooth fade in/out transitions
-
-## Files
-- `index.html` - Clean HTML structure
-- `styles.css` - Animated gradient + glassmorphism
-- `app.js` - Audio playback + timer logic
-
-## How to Use
-1. Open `index.html` in a browser
-2. Select a category (lofi, ambient, jazz, violin, piano)
-3. Set timer duration (15/25/45 min)
-4. Press play to start audio and timer
-5. Use prev/next to switch categories
+### Step 4: Test
+- [x] Verify music plays with Web Audio API
+- [x] Verify no timer elements visible
+- [x] Verify play/pause works correctly
 
