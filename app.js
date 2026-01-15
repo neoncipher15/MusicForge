@@ -31,13 +31,15 @@ const elements = {
     taskList: document.getElementById('taskList'),
     completedCount: document.getElementById('completedCount'),
     totalCount: document.getElementById('totalCount'),
-    volumeSlider: document.getElementById('volumeSlider'),
     modal: document.getElementById('customTimerModal'),
     customHours: document.getElementById('customHours'),
     customMinutes: document.getElementById('customMinutes'),
     customSeconds: document.getElementById('customSeconds'),
     cancelTimer: document.getElementById('cancelTimer'),
-    setTimer: document.getElementById('setTimer')
+    setTimer: document.getElementById('setTimer'),
+    donationBtn: document.getElementById('donationBtn'),
+    donationModal: document.getElementById('donationModal'),
+    donationClose: document.getElementById('donationClose')
 };
 
 // Timer Functions
@@ -269,11 +271,6 @@ function initEventListeners() {
         }
     });
     
-    // Volume (placeholder - can be used for future features)
-    elements.volumeSlider.addEventListener('input', (e) => {
-        state.volume = e.target.value / 100;
-    });
-    
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT') return;
@@ -285,6 +282,23 @@ function initEventListeners() {
                 break;
         }
     });
+    
+    // Donation modal
+    if (elements.donationBtn) {
+        elements.donationBtn.addEventListener('click', () => {
+            elements.donationModal.classList.add('active');
+        });
+        
+        elements.donationClose.addEventListener('click', () => {
+            elements.donationModal.classList.remove('active');
+        });
+        
+        elements.donationModal.addEventListener('click', (e) => {
+            if (e.target === elements.donationModal) {
+                elements.donationModal.classList.remove('active');
+            }
+        });
+    }
 }
 
 // Initialize
