@@ -1,130 +1,7 @@
 /**
  * Focus Forge - Master Your Focus
- * Timer + Task Management with User Authentication
+ * Timer + Task Management (No login required)
  */
-
-// ==========================================
-// AUTHENTICATION FUNCTIONS
-// ==========================================
-
-/**
- * Get current session
- */
-function getCurrentSession() {
-    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
-           JSON.parse(sessionStorage.getItem('focusForgeSession'));
-}
-
-/**
- * Check if user is logged in
- */
-function isLoggedIn() {
-    return getCurrentSession() !== null;
-}
-
-/**
- * Get current user ID
- */
-function getCurrentUserId() {
-    const session = getCurrentSession();
-    return session ? session.userId : null;
-}
-
-/**
- * Redirect to login if not logged in
- */
-function requireAuth() {
-    if (!isLoggedIn()) {
-        window.location.href = 'login.html';
-    }
-}
-
-/**
- * Logout user
- */
-function logoutUser() {
-    localStorage.removeItem('focusForgeSession');
-    sessionStorage.removeItem('focusForgeSession');
-    window.location.href = 'login.html';
-}
-
-// ==========================================
-// USER DATA FUNCTIONS
-// ==========================================
-
-/**
- * Get user data object
- */
-function getUserData(userId) {
-    const key = `focusForgeData_${userId}`;
-    return JSON.parse(localStorage.getItem(key)) || {
-        tasks: [],
-        sessions: [],
-        settings: {
-            soundEnabled: true,
-            timerDuration: 25
-        }
-    };
-}
-
-/**
- * Save user data object
- */
-function saveUserData(userId, data) {
-    const key = `focusForgeData_${userId}`;
-    localStorage.setItem(key, JSON.stringify(data));
-}
-
-/**
- * Get user's tasks
- */
-function getUserTasks(userId) {
-    const data = getUserData(userId);
-    return data.tasks || [];
-}
-
-/**
- * Save user's tasks
- */
-function saveUserTasks(userId, tasks) {
-    const data = getUserData(userId);
-    data.tasks = tasks;
-    saveUserData(userId, data);
-}
-
-/**
- * Get user's sessions
- */
-function getUserSessions(userId) {
-    const data = getUserData(userId);
-    return data.sessions || [];
-}
-
-/**
- * Save user's session
- */
-function saveUserSessionData(userId, session) {
-    const data = getUserData(userId);
-    data.sessions.push(session);
-    saveUserData(userId, data);
-}
-
-/**
- * Get user's settings
- */
-function getUserSettings(userId) {
-    const data = getUserData(userId);
-    return data.settings;
-}
-
-/**
- * Save user's settings
- */
-function saveUserSettings(userId, settings) {
-    const data = getUserData(userId);
-    data.settings = { ...data.settings, ...settings };
-    saveUserData(userId, data);
-}
 
 // ==========================================
 // INTRO SCREEN FUNCTIONS
@@ -134,12 +11,8 @@ function saveUserSettings(userId, settings) {
  * Check if this is the first visit today
  */
 function isFirstVisitToday() {
-    const userId = getCurrentUserId();
-    if (!userId) return true;
-    
     const today = new Date().toISOString().split('T')[0];
-    const lastVisitKey = `focusForgeLastVisit_${userId}`;
-    const lastVisit = localStorage.getItem(lastVisitKey);
+    const lastVisit = localStorage.getItem('focusForgeLastVisit');
     return lastVisit !== today;
 }
 
@@ -154,11 +27,7 @@ function getTodayDate() {
  * Store today's date as the last visit date
  */
 function storeLastVisitDate() {
-    const userId = getCurrentUserId();
-    if (userId) {
-        const lastVisitKey = `focusForgeLastVisit_${userId}`;
-        localStorage.setItem(lastVisitKey, getTodayDate());
-    }
+    localStorage.setItem('focusForgeLastVisit', getTodayDate());
 }
 
 /**
@@ -267,16 +136,101 @@ async function initIntroScreen() {
 }
 
 // ==========================================
-// APP STATE & DATA
+// TASK FUNCTIONS
 // ==========================================
 
-// Task storage - per user
-let tasks = [];
+// Task storage
+let tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
 
-// App State
+// Save tasks to localStorage
+function saveTasks() {
+    localStorage.setItem('focusForgeTasks', JSON.stringify(tasks));
+}
+
+// Add a new task
+function addTask(text) {
+    if (text.trim()) {
+        tasks.push({ 
+            text: text.trim(), 
+            completed: false,
+            createdAt: new Date().toISOString()
+        });
+        saveTasks();
+        renderTasks();
+    }
+}
+
+// Toggle task completion
+function toggleTask(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
+}
+
+// Delete a task
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+}
+
+// Render tasks in the DOM
+function renderTasks() {
+    const taskList = document.getElementById('taskList');
+    if (!taskList) return;
+    
+    taskList.innerHTML = '';
+    
+    tasks.forEach((task, index) => {
+        const taskEl = document.createElement('div');
+        taskEl.className = `task-item${task.completed ? ' completed' : ''}`;
+        taskEl.innerHTML = `
+            <div class="task-checkbox${task.completed ? ' checked' : ''}" data-index="${index}">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3"/>
+                </svg>
+            </div>
+            <span class="task-text">${escapeHtml(task.text)}</span>
+            <button class="task-delete" data-index="${index}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        `;
+        taskList.appendChild(taskEl);
+    });
+    
+    updateTaskStats();
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Update task stats
+function updateTaskStats() {
+    const completed = tasks.filter(t => t.completed).length;
+    const completedEl = document.getElementById('completedCount');
+    const totalEl = document.getElementById('totalCount');
+    
+    if (completedEl) completedEl.textContent = completed;
+    if (totalEl) totalEl.textContent = tasks.length;
+}
+
+// ==========================================
+// TIMER STATE
+// ==========================================
+
 const state = {
-    soundEnabled: true,
-    updateInterval: null
+    timerTime: 25 * 60,
+    timerTotal: 25 * 60,
+    timerInterval: null,
+    isTimerRunning: false,
+    soundEnabled: JSON.parse(localStorage.getItem('focusForgeSound')) !== false
 };
 
 // ==========================================
@@ -310,88 +264,101 @@ const elements = {
     donationBtn: document.getElementById('donationBtn'),
     donationModal: document.getElementById('donationModal'),
     donationClose: document.getElementById('donationClose'),
-    sidebarDonation: document.getElementById('sidebarDonation'),
-    sidebarLogout: document.getElementById('sidebarLogout')
+    sidebarDonation: document.getElementById('sidebarDonation')
 };
 
 // ==========================================
-// TIMER FUNCTIONS (using shared Timer module)
+// TIMER FUNCTIONS
 // ==========================================
 
 function updateTimerDisplay() {
-    const timerState = Timer.getState();
-    const formatted = Timer.formatTime(timerState.timeRemaining);
-    elements.timerMinutes.textContent = formatted.minutes;
-    elements.timerSeconds.textContent = formatted.seconds;
+    const minutes = Math.floor(state.timerTime / 60);
+    const seconds = state.timerTime % 60;
+    if (elements.timerMinutes) elements.timerMinutes.textContent = minutes.toString().padStart(2, '0');
+    if (elements.timerSeconds) elements.timerSeconds.textContent = seconds.toString().padStart(2, '0');
 }
 
 function updateTimerRing() {
-    const progress = Timer.getProgress();
     const circumference = 2 * Math.PI * 90;
+    const progress = state.timerTotal > 0 ? (state.timerTotal - state.timerTime) / state.timerTotal : 0;
     const offset = circumference * (1 - Math.min(progress, 1));
-    elements.timerRing.style.strokeDashoffset = offset;
+    if (elements.timerRing) elements.timerRing.style.strokeDashoffset = offset;
 }
 
-function updatePlayButton() {
-    const isRunning = Timer.isRunning();
-    if (isRunning) {
-        elements.playIcon.style.display = 'none';
-        elements.pauseIcon.style.display = 'block';
-    } else {
-        elements.playIcon.style.display = 'block';
-        elements.pauseIcon.style.display = 'none';
-    }
-}
-
-function toggleTimer() {
-    const timerState = Timer.getState();
-    
-    if (timerState.isRunning) {
-        Timer.stop();
-    } else {
-        // Check if timer is at start (not completed yet)
-        if (timerState.timeRemaining <= 0) {
-            // Timer completed, reset and start fresh
-            const userId = getCurrentUserId();
-            const settings = userId ? getUserSettings(userId) : { timerDuration: 25 };
-            const duration = (settings.timerDuration || 25) * 60;
-            Timer.setDuration(duration);
+function startTimer() {
+    clearInterval(state.timerInterval);
+    state.timerInterval = setInterval(() => {
+        if (state.timerTime > 0) {
+            state.timerTime--;
+            updateTimerDisplay();
+            updateTimerRing();
+        } else {
+            // Timer complete
+            clearInterval(state.timerInterval);
+            state.isTimerRunning = false;
+            updatePlayButton();
+            showTimerComplete();
         }
-        Timer.start();
-    }
-    updateTimerDisplay();
-    updatePlayButton();
+    }, 1000);
 }
 
-function resetTimer() {
-    const userId = getCurrentUserId();
-    const settings = userId ? getUserSettings(userId) : { timerDuration: 25 };
-    const duration = (settings.timerDuration || 25) * 60;
-    Timer.reset();
-    Timer.setDuration(duration);
-    updateTimerDisplay();
-    updateTimerRing();
-    updatePlayButton();
+function stopTimer() {
+    clearInterval(state.timerInterval);
 }
 
 function setTimer(minutes, seconds = 0) {
-    const totalSeconds = minutes * 60 + seconds;
-    Timer.setDuration(totalSeconds);
+    stopTimer();
+    state.timerTime = minutes * 60 + seconds;
+    state.timerTotal = state.timerTime;
     updateTimerDisplay();
     updateTimerRing();
     
     // Update preset buttons
-    elements.presetBtns.forEach(btn => {
-        const btnMinutes = parseInt(btn.dataset.time);
-        btn.classList.toggle('active', btnMinutes === minutes && seconds === 0);
-    });
+    if (elements.presetBtns) {
+        elements.presetBtns.forEach(btn => {
+            const btnMinutes = parseInt(btn.dataset.time);
+            btn.classList.toggle('active', btnMinutes === minutes && seconds === 0);
+        });
+    }
+}
+
+function toggleTimer() {
+    if (state.isTimerRunning) {
+        stopTimer();
+        state.isTimerRunning = false;
+    } else {
+        if (state.timerTime <= 0) {
+            state.timerTime = state.timerTotal;
+        }
+        startTimer();
+        state.isTimerRunning = true;
+    }
+    updatePlayButton();
+}
+
+function updatePlayButton() {
+    if (elements.playIcon && elements.pauseIcon) {
+        if (state.isTimerRunning) {
+            elements.playIcon.style.display = 'none';
+            elements.pauseIcon.style.display = 'block';
+        } else {
+            elements.playIcon.style.display = 'block';
+            elements.pauseIcon.style.display = 'none';
+        }
+    }
+}
+
+function resetTimer() {
+    stopTimer();
+    state.isTimerRunning = false;
+    state.timerTime = state.timerTotal;
+    updateTimerDisplay();
+    updateTimerRing();
+    updatePlayButton();
 }
 
 function showTimerComplete() {
-    // Play completion sound
     playSessionCompleteSound();
-    
-    // Save session data for analytics
     saveSessionData();
     
     const notification = document.createElement('div');
@@ -402,25 +369,42 @@ function showTimerComplete() {
     setTimeout(() => {
         notification.remove();
     }, 3000);
-    
-    // Update play button
-    updatePlayButton();
 }
 
-// Save session data to user-specific storage
+// Save session data for analytics
 function saveSessionData() {
-    const userId = getCurrentUserId();
-    if (!userId) return;
-    
-    const timerState = Timer.getState();
+    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
     const session = {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
-        duration: Math.floor(timerState.totalTime / 60), // in minutes
+        duration: Math.floor(state.timerTotal / 60),
         completedAt: new Date().toISOString()
     };
+    sessions.push(session);
+    localStorage.setItem('focusForgeSessions', JSON.stringify(sessions));
     
-    saveUserSessionData(userId, session);
+    // Update leaderboard
+    updateLeaderboard();
+}
+
+// ==========================================
+// LEADERBOARD FUNCTIONS
+// ==========================================
+
+function getLeaderboardData() {
+    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+    const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    return totalMinutes;
+}
+
+function updateLeaderboard() {
+    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+    const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const totalHours = (totalMinutes / 60).toFixed(1);
+    
+    // Store for leaderboard page
+    localStorage.setItem('focusForgeTotalMinutes', totalMinutes.toString());
+    localStorage.setItem('focusForgeTotalHours', totalHours);
 }
 
 // ==========================================
@@ -428,22 +412,14 @@ function saveSessionData() {
 // ==========================================
 
 function playSessionCompleteSound() {
-    const userId = getCurrentUserId();
-    const settings = userId ? getUserSettings(userId) : { soundEnabled: true };
+    if (!state.soundEnabled) return;
     
-    if (!settings.soundEnabled) return;
-    
-    // Create audio context
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     
     const audioCtx = new AudioContext();
-    
-    // Create a pleasant chime with multiple harmonics
     const now = audioCtx.currentTime;
-    
-    // Main tone - C5 note
-    const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const frequencies = [523.25, 659.25, 783.99, 1046.50];
     
     frequencies.forEach((freq, index) => {
         const oscillator = audioCtx.createOscillator();
@@ -455,38 +431,26 @@ function playSessionCompleteSound() {
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(freq, now);
         
-        // Staggered envelope for each note
         const startTime = now + index * 0.15;
-        const attackTime = 0.05;
-        const decayTime = 1.5;
-        const sustainLevel = 0.1;
-        const releaseTime = 1.0;
-        
         gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(0.2, startTime + attackTime);
-        gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attackTime + decayTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + attackTime + decayTime + releaseTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+        gainNode.gain.linearRampToValueAtTime(0.1, startTime + 1.5);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 2.5);
         
         oscillator.start(startTime);
-        oscillator.stop(startTime + attackTime + decayTime + releaseTime + 0.1);
+        oscillator.stop(startTime + 2.6);
     });
 }
 
 function toggleSound() {
-    const userId = getCurrentUserId();
-    const settings = getUserSettings(userId);
-    const newSoundEnabled = !settings.soundEnabled;
-    saveUserSettings(userId, { soundEnabled: newSoundEnabled });
-    state.soundEnabled = newSoundEnabled;
+    state.soundEnabled = !state.soundEnabled;
+    localStorage.setItem('focusForgeSound', state.soundEnabled);
     updateSoundButton();
 }
 
 function updateSoundButton() {
-    if (elements.soundBtn) {
-        const userId = getCurrentUserId();
-        const settings = userId ? getUserSettings(userId) : { soundEnabled: true };
-        
-        if (settings.soundEnabled !== false) {
+    if (elements.soundBtn && elements.soundOn && elements.soundOff) {
+        if (state.soundEnabled) {
             elements.soundBtn.classList.remove('muted');
             elements.soundOn.style.display = 'block';
             elements.soundOff.style.display = 'none';
@@ -499,81 +463,14 @@ function updateSoundButton() {
 }
 
 // ==========================================
-// TASK FUNCTIONS
-// ==========================================
-
-function saveTasks() {
-    const userId = getCurrentUserId();
-    if (userId) {
-        saveUserTasks(userId, tasks);
-    }
-}
-
-function renderTasks() {
-    elements.taskList.innerHTML = '';
-    
-    tasks.forEach((task, index) => {
-        const taskEl = document.createElement('div');
-        taskEl.className = `task-item${task.completed ? ' completed' : ''}`;
-        taskEl.innerHTML = `
-            <div class="task-checkbox${task.completed ? ' checked' : ''}" data-index="${index}">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3"/>
-                </svg>
-            </div>
-            <span class="task-text">${escapeHtml(task.text)}</span>
-            <button class="task-delete" data-index="${index}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        `;
-        elements.taskList.appendChild(taskEl);
-    });
-    
-    updateTaskStats();
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function updateTaskStats() {
-    const completed = tasks.filter(t => t.completed).length;
-    elements.completedCount.textContent = completed;
-    elements.totalCount.textContent = tasks.length;
-}
-
-function addTask(text) {
-    if (text.trim()) {
-        tasks.push({ text: text.trim(), completed: false });
-        saveTasks();
-        renderTasks();
-    }
-}
-
-function toggleTask(index) {
-    tasks[index].completed = !tasks[index].completed;
-    saveTasks();
-    renderTasks();
-}
-
-function deleteTask(index) {
-    tasks.splice(index, 1);
-    saveTasks();
-    renderTasks();
-}
-
-// ==========================================
 // EVENT LISTENERS
 // ==========================================
 
 function initEventListeners() {
     // Play/Pause
-    elements.playBtn.addEventListener('click', toggleTimer);
+    if (elements.playBtn) {
+        elements.playBtn.addEventListener('click', toggleTimer);
+    }
     
     // Reset timer
     if (elements.resetBtn) {
@@ -586,121 +483,132 @@ function initEventListeners() {
     }
     
     // Preset buttons
-    elements.presetBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            setTimer(parseInt(btn.dataset.time));
+    if (elements.presetBtns) {
+        elements.presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setTimer(parseInt(btn.dataset.time));
+            });
         });
-    });
+    }
     
     // Custom timer modal
-    elements.timerRingContainer.addEventListener('click', () => {
-        const timerState = Timer.getState();
-        const totalSeconds = timerState.totalTime;
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        elements.customHours.value = hours;
-        elements.customMinutes.value = minutes;
-        elements.customSeconds.value = seconds;
-        
-        elements.modal.classList.add('active');
-    });
-    
-    elements.cancelTimer.addEventListener('click', () => {
-        elements.modal.classList.remove('active');
-    });
-    
-    elements.setTimer.addEventListener('click', () => {
-        const hours = parseInt(elements.customHours.value) || 0;
-        const minutes = parseInt(elements.customMinutes.value) || 0;
-        const seconds = parseInt(elements.customSeconds.value) || 0;
-        
-        const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        if (totalSeconds > 0) {
-            Timer.setDuration(totalSeconds);
-            updateTimerDisplay();
-            updateTimerRing();
+    if (elements.timerRingContainer) {
+        elements.timerRingContainer.addEventListener('click', () => {
+            const hours = Math.floor(state.timerTotal / 3600);
+            const minutes = Math.floor((state.timerTotal % 3600) / 60);
+            const seconds = state.timerTotal % 60;
             
-            // Update presets
-            elements.presetBtns.forEach(btn => btn.classList.remove('active'));
-        }
-        
-        elements.modal.classList.remove('active');
-    });
+            if (elements.customHours) elements.customHours.value = hours;
+            if (elements.customMinutes) elements.customMinutes.value = minutes;
+            if (elements.customSeconds) elements.customSeconds.value = seconds;
+            
+            if (elements.modal) elements.modal.classList.add('active');
+        });
+    }
+    
+    if (elements.cancelTimer) {
+        elements.cancelTimer.addEventListener('click', () => {
+            if (elements.modal) elements.modal.classList.remove('active');
+        });
+    }
+    
+    if (elements.setTimer) {
+        elements.setTimer.addEventListener('click', () => {
+            const hours = parseInt(elements.customHours?.value) || 0;
+            const minutes = parseInt(elements.customMinutes?.value) || 0;
+            const seconds = parseInt(elements.customSeconds?.value) || 0;
+            
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+            if (totalSeconds > 0) {
+                stopTimer();
+                state.timerTime = totalSeconds;
+                state.timerTotal = totalSeconds;
+                updateTimerDisplay();
+                updateTimerRing();
+                
+                if (elements.presetBtns) {
+                    elements.presetBtns.forEach(btn => btn.classList.remove('active'));
+                }
+            }
+            
+            if (elements.modal) elements.modal.classList.remove('active');
+        });
+    }
     
     // Close modal on backdrop click
-    elements.modal.addEventListener('click', (e) => {
-        if (e.target === elements.modal) {
-            elements.modal.classList.remove('active');
-        }
-    });
+    if (elements.modal) {
+        elements.modal.addEventListener('click', (e) => {
+            if (e.target === elements.modal) {
+                elements.modal.classList.remove('active');
+            }
+        });
+    }
     
     // Task input
-    elements.addTaskBtn.addEventListener('click', () => {
-        addTask(elements.taskInput.value);
-        elements.taskInput.value = '';
-    });
-    
-    elements.taskInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    if (elements.addTaskBtn && elements.taskInput) {
+        elements.addTaskBtn.addEventListener('click', () => {
             addTask(elements.taskInput.value);
             elements.taskInput.value = '';
-        }
-    });
+        });
+        
+        elements.taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTask(elements.taskInput.value);
+                elements.taskInput.value = '';
+            }
+        });
+    }
     
     // Task delegation
-    elements.taskList.addEventListener('click', (e) => {
-        const checkbox = e.target.closest('.task-checkbox');
-        const deleteBtn = e.target.closest('.task-delete');
-        
-        if (checkbox) {
-            toggleTask(parseInt(checkbox.dataset.index));
-        } else if (deleteBtn) {
-            deleteTask(parseInt(deleteBtn.dataset.index));
-        }
-    });
+    if (elements.taskList) {
+        elements.taskList.addEventListener('click', (e) => {
+            const checkbox = e.target.closest('.task-checkbox');
+            const deleteBtn = e.target.closest('.task-delete');
+            
+            if (checkbox) {
+                toggleTask(parseInt(checkbox.dataset.index));
+            } else if (deleteBtn) {
+                deleteTask(parseInt(deleteBtn.dataset.index));
+            }
+        });
+    }
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT') return;
         
-        switch(e.code) {
-            case 'Space':
-                e.preventDefault();
-                toggleTimer();
-                break;
+        if (e.code === 'Space') {
+            e.preventDefault();
+            toggleTimer();
         }
     });
     
     // Donation modal
     if (elements.donationBtn) {
         elements.donationBtn.addEventListener('click', () => {
-            elements.donationModal.classList.add('active');
+            if (elements.donationModal) elements.donationModal.classList.add('active');
         });
     }
     
-    // Sidebar donation trigger
     if (elements.sidebarDonation) {
         elements.sidebarDonation.addEventListener('click', () => {
-            elements.donationModal.classList.add('active');
+            if (elements.donationModal) elements.donationModal.classList.add('active');
         });
     }
     
-    // Logout button
-    if (elements.sidebarLogout) {
-        elements.sidebarLogout.addEventListener('click', logoutUser);
+    if (elements.donationClose) {
+        elements.donationClose.addEventListener('click', () => {
+            if (elements.donationModal) elements.donationModal.classList.remove('active');
+        });
     }
     
-    elements.donationClose.addEventListener('click', () => {
-        elements.donationModal.classList.remove('active');
-    });
-    
-    elements.donationModal.addEventListener('click', (e) => {
-        if (e.target === elements.donationModal) {
-            elements.donationModal.classList.remove('active');
-        }
-    });
+    if (elements.donationModal) {
+        elements.donationModal.addEventListener('click', (e) => {
+            if (e.target === elements.donationModal) {
+                elements.donationModal.classList.remove('active');
+            }
+        });
+    }
 }
 
 // ==========================================
@@ -708,22 +616,7 @@ function initEventListeners() {
 // ==========================================
 
 async function init() {
-    // Check authentication - redirect to login if not logged in
-    requireAuth();
-    
-    // Load user data
-    const userId = getCurrentUserId();
-    if (userId) {
-        tasks = getUserTasks(userId);
-        
-        // Load user settings
-        const settings = getUserSettings(userId);
-        if (settings) {
-            state.soundEnabled = settings.soundEnabled !== false;
-        }
-    }
-    
-    // Initialize intro screen first (waits for completion if first visit today)
+    // Initialize intro screen first
     await initIntroScreen();
     
     // Initialize timer display
@@ -731,23 +624,12 @@ async function init() {
     updateTimerRing();
     updatePlayButton();
     
-    // Update timer display every second
-    state.updateInterval = setInterval(() => {
-        const timerState = Timer.getState();
-        
-        // Check if timer completed
-        if (timerState.timeRemaining <= 0 && timerState.isRunning) {
-            Timer.stop();
-            showTimerComplete();
-        }
-        
-        updateTimerDisplay();
-        updatePlayButton();
-    }, 1000);
-    
-    initEventListeners();
+    // Initialize tasks
     renderTasks();
     updateSoundButton();
+    
+    // Initialize event listeners
+    initEventListeners();
 }
 
 // Start

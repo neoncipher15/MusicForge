@@ -1,101 +1,10 @@
 /**
  * Focus Forge - Calendar Page
- * Schedule tasks and view them by date with user authentication
+ * Schedule tasks and view them by date with simple localStorage
  */
 
-// ==========================================
-// AUTHENTICATION FUNCTIONS
-// ==========================================
-
-/**
- * Get current session
- */
-function getCurrentSession() {
-    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
-           JSON.parse(sessionStorage.getItem('focusForgeSession'));
-}
-
-/**
- * Check if user is logged in
- */
-function isLoggedIn() {
-    return getCurrentSession() !== null;
-}
-
-/**
- * Get current user ID
- */
-function getCurrentUserId() {
-    const session = getCurrentSession();
-    return session ? session.userId : null;
-}
-
-/**
- * Redirect to login if not logged in
- */
-function requireAuth() {
-    if (!isLoggedIn()) {
-        window.location.href = 'login.html';
-    }
-}
-
-/**
- * Logout user
- */
-function logoutUser() {
-    localStorage.removeItem('focusForgeSession');
-    sessionStorage.removeItem('focusForgeSession');
-    window.location.href = 'login.html';
-}
-
-// ==========================================
-// USER DATA FUNCTIONS
-// ==========================================
-
-/**
- * Get user data object
- */
-function getUserData(userId) {
-    const key = `focusForgeData_${userId}`;
-    return JSON.parse(localStorage.getItem(key)) || {
-        scheduledTasks: {},
-        sessions: [],
-        settings: {}
-    };
-}
-
-/**
- * Save user data object
- */
-function saveUserData(userId, data) {
-    const key = `focusForgeData_${userId}`;
-    localStorage.setItem(key, JSON.stringify(data));
-}
-
-/**
- * Get user's scheduled tasks
- */
-function getUserScheduledTasks(userId) {
-    const data = getUserData(userId);
-    return data.scheduledTasks || {};
-}
-
-/**
- * Save user's scheduled tasks
- */
-function saveUserScheduledTasks(userId, scheduledTasks) {
-    const data = getUserData(userId);
-    data.scheduledTasks = scheduledTasks;
-    saveUserData(userId, data);
-}
-
-// ==========================================
-// CALENDAR FUNCTIONS
-// ==========================================
-
-// Get data from user-specific storage
-let scheduledTasks = {};
-let allTasks = {};
+// Scheduled tasks storage
+let scheduledTasks = JSON.parse(localStorage.getItem('focusForgeScheduledTasks')) || {};
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -103,12 +12,9 @@ let selectedDate = null;
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// Save to user-specific localStorage
+// Save to localStorage
 function saveScheduledTasks() {
-    const userId = getCurrentUserId();
-    if (userId) {
-        saveUserScheduledTasks(userId, scheduledTasks);
-    }
+    localStorage.setItem('focusForgeScheduledTasks', JSON.stringify(scheduledTasks));
 }
 
 // Format date as YYYY-MM-DD
@@ -142,10 +48,14 @@ function getCalendarData(year, month) {
 function renderCalendar() {
     const data = getCalendarData(currentDate.getFullYear(), currentDate.getMonth());
     
-    // Update header
-    document.getElementById('currentMonth').textContent = `${monthNames[data.month]} ${data.year}`;
+    const monthEl = document.getElementById('currentMonth');
+    if (monthEl) {
+        monthEl.textContent = `${monthNames[data.month]} ${data.year}`;
+    }
     
     const grid = document.getElementById('calendarGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     // Add day headers
@@ -198,6 +108,8 @@ function selectDate(date) {
 function renderSelectedDateTasks() {
     const title = document.getElementById('selectedDateTitle');
     const tasksContainer = document.getElementById('selectedDateTasks');
+    
+    if (!title || !tasksContainer) return;
     
     if (!selectedDate) {
         title.textContent = 'Select a date';
@@ -301,68 +213,61 @@ const elements = {
     addDateTaskBtn: document.getElementById('addDateTaskBtn'),
     donationModal: document.getElementById('donationModal'),
     donationClose: document.getElementById('donationClose'),
-    sidebarDonation: document.getElementById('sidebarDonation'),
-    sidebarLogout: document.getElementById('sidebarLogout')
+    sidebarDonation: document.getElementById('sidebarDonation')
 };
 
 // Initialize
 function init() {
-    // Check authentication
-    requireAuth();
-    
-    // Load user data
-    const userId = getCurrentUserId();
-    if (userId) {
-        scheduledTasks = getUserScheduledTasks(userId);
-    }
-    
     // Render calendar
     renderCalendar();
     
     // Navigation
-    elements.prevMonth.addEventListener('click', () => navigateMonth(-1));
-    elements.nextMonth.addEventListener('click', () => navigateMonth(1));
+    if (elements.prevMonth) {
+        elements.prevMonth.addEventListener('click', () => navigateMonth(-1));
+    }
+    if (elements.nextMonth) {
+        elements.nextMonth.addEventListener('click', () => navigateMonth(1));
+    }
     
     // Add task to date
-    elements.addDateTaskBtn.addEventListener('click', () => {
-        addTaskToDate(elements.dateTaskInput.value);
-        elements.dateTaskInput.value = '';
-    });
-    
-    elements.dateTaskInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    if (elements.addDateTaskBtn && elements.dateTaskInput) {
+        elements.addDateTaskBtn.addEventListener('click', () => {
             addTaskToDate(elements.dateTaskInput.value);
             elements.dateTaskInput.value = '';
-        }
-    });
+        });
+        
+        elements.dateTaskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTaskToDate(elements.dateTaskInput.value);
+                elements.dateTaskInput.value = '';
+            }
+        });
+    }
     
     // Task delegation in sidebar
-    elements.selectedDateTasks.addEventListener('click', (e) => {
-        const checkbox = e.target.closest('.task-checkbox');
-        const deleteBtn = e.target.closest('.task-delete');
-        
-        if (checkbox) {
-            toggleScheduledTask(parseInt(checkbox.dataset.index));
-        } else if (deleteBtn) {
-            deleteScheduledTask(parseInt(deleteBtn.dataset.index));
-        }
-    });
+    if (elements.selectedDateTasks) {
+        elements.selectedDateTasks.addEventListener('click', (e) => {
+            const checkbox = e.target.closest('.task-checkbox');
+            const deleteBtn = e.target.closest('.task-delete');
+            
+            if (checkbox) {
+                toggleScheduledTask(parseInt(checkbox.dataset.index));
+            } else if (deleteBtn) {
+                deleteScheduledTask(parseInt(deleteBtn.dataset.index));
+            }
+        });
+    }
     
     // Donation modal
     if (elements.sidebarDonation) {
         elements.sidebarDonation.addEventListener('click', () => {
-            elements.donationModal.classList.add('active');
+            if (elements.donationModal) elements.donationModal.classList.add('active');
         });
-    }
-    
-    // Logout button
-    if (elements.sidebarLogout) {
-        elements.sidebarLogout.addEventListener('click', logoutUser);
     }
     
     if (elements.donationClose) {
         elements.donationClose.addEventListener('click', () => {
-            elements.donationModal.classList.remove('active');
+            if (elements.donationModal) elements.donationModal.classList.remove('active');
         });
     }
     
