@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindFlow - Focus & Relax</title>
+    <title>Focus Forge - Master Your Focus</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,90 +22,140 @@
                     <path d="M20 8C20 8 12 16 12 24C12 28.4183 15.5817 32 20 32C24.4183 32 28 28.4183 28 24C28 16 20 8 20 8Z" fill="currentColor"/>
                     <circle cx="20" cy="24" r="3" fill="white"/>
                 </svg>
-                <span>MindFlow</span>
+                <span>Focus Forge</span>
             </div>
         </header>
 
-        <!-- Category Cards -->
-        <div class="categories">
-            <div class="category" data-category="focus">
-                <div class="category-icon">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
-                        <path d="M24 12v12l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Timer Section (Left) -->
+            <div class="timer-section">
+                <div class="section-label">Select Soundscape</div>
+                
+                <div class="categories">
+                    <div class="category active" data-category="focus">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+                                <path d="M24 12v12l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span>Focus</span>
+                    </div>
+                    
+                    <div class="category" data-category="relax">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="24" cy="24" r="3" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span>Relax</span>
+                    </div>
+                    
+                    <div class="category" data-category="sleep">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <path d="M12 36c0-8 6-14 14-14s14 6 14 14" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 24a20 20 0 0 1 32 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="36" cy="14" r="3" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span>Sleep</span>
+                    </div>
+                    
+                    <div class="category" data-category="meditate">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="24" cy="24" r="2" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span>Meditate</span>
+                    </div>
                 </div>
-                <span>Focus</span>
-            </div>
-            
-            <div class="category" data-category="relax">
-                <div class="category-icon">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="24" cy="24" r="3" fill="currentColor"/>
-                    </svg>
-                </div>
-                <span>Relax</span>
-            </div>
-            
-            <div class="category" data-category="sleep">
-                <div class="category-icon">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <path d="M12 36c0-8 6-14 14-14s14 6 14 14" stroke="currentColor" stroke-width="2"/>
-                        <path d="M8 24a20 20 0 0 1 32 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <circle cx="36" cy="14" r="3" fill="currentColor"/>
-                    </svg>
-                </div>
-                <span>Sleep</span>
-            </div>
-            
-            <div class="category" data-category="meditate">
-                <div class="category-icon">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="24" cy="24" r="2" fill="currentColor"/>
-                    </svg>
-                </div>
-                <span>Meditate</span>
-            </div>
-            
-            <div class="category" data-category="power">
-                <div class="category-icon">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <path d="M24 8v16M24 8c5 5 8 11 8 16s-3 11-8 16M24 8c-5 5-8 11-8 16s3 11 8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </div>
-                <span>Power Nap</span>
-            </div>
-        </div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <button class="btn btn-secondary" id="prevBtn">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="19 20 9 12 19 4 19 20"/>
-                    <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/>
-                </svg>
-            </button>
-            
-            <button class="btn btn-play" id="playBtn">
-                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-                    <rect x="6" y="4" width="4" height="16"/>
-                    <rect x="14" y="4" width="4" height="16"/>
-                </svg>
-            </button>
-            
-            <button class="btn btn-secondary" id="nextBtn">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="5 4 15 12 5 20 5 4"/>
-                    <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/>
-                </svg>
-            </button>
+                <div class="timer-ring-container">
+                    <svg class="timer-svg" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#667eea"/>
+                                <stop offset="100%" style="stop-color:#764ba2"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="timer-bg" cx="100" cy="100" r="90"/>
+                        <circle class="timer-progress" cx="100" cy="100" r="90" id="timerRing"/>
+                    </svg>
+                    <div class="timer-text">
+                        <span id="timerMinutes">25</span>
+                        <span class="timer-sep">:</span>
+                        <span id="timerSeconds">00</span>
+                    </div>
+                </div>
+                <p class="timer-hint">Click time to customize</p>
+                
+                <!-- Timer Controls -->
+                <div class="timer-presets">
+                    <button class="preset-btn" data-time="15">15m</button>
+                    <button class="preset-btn active" data-time="25">25m</button>
+                    <button class="preset-btn" data-time="45">45m</button>
+                    <button class="preset-btn" data-time="60">60m</button>
+                </div>
+                
+                <!-- Timer Controls -->
+                <div class="controls">
+                    <button class="btn btn-secondary" id="prevBtn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="19 20 9 12 19 4 19 20"/>
+                            <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="btn btn-play" id="playBtn">
+                        <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                            <rect x="6" y="4" width="4" height="16"/>
+                            <rect x="14" y="4" width="4" height="16"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="nextBtn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 4 15 12 5 20 5 4"/>
+                            <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Task Section (Right) -->
+            <div class="task-section">
+                <div class="task-card">
+                    <h2 class="task-title">Today's Tasks</h2>
+                    
+                    <div class="task-input-container">
+                        <input type="text" id="taskInput" placeholder="Add a new task...">
+                        <button id="addTaskBtn" class="add-task-btn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
+                                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="task-list" id="taskList">
+                        <!-- Tasks will be added here -->
+                    </div>
+                    
+                    <div class="task-stats">
+                        <span id="completedCount">0</span> / <span id="totalCount">0</span> completed
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Volume Control -->
@@ -114,7 +164,34 @@
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
             </svg>
-            <input type="range" id="volumeSlider" min="0" max="100" value="70">
+            <input type="range" id="volumeSlider" min="0" max="100" value="50">
+        </div>
+    </div>
+
+    <!-- Custom Timer Modal -->
+    <div class="modal" id="customTimerModal">
+        <div class="modal-content">
+            <h3>Custom Timer</h3>
+            <div class="custom-time-inputs">
+                <div class="input-group">
+                    <label>Hours</label>
+                    <input type="number" id="customHours" min="0" max="23" value="0">
+                </div>
+                <span class="time-sep">:</span>
+                <div class="input-group">
+                    <label>Minutes</label>
+                    <input type="number" id="customMinutes" min="0" max="59" value="25">
+                </div>
+                <span class="time-sep">:</span>
+                <div class="input-group">
+                    <label>Seconds</label>
+                    <input type="number" id="customSeconds" min="0" max="59" value="0">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelTimer">Cancel</button>
+                <button class="modal-btn confirm" id="setTimer">Set Timer</button>
+            </div>
         </div>
     </div>
 

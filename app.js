@@ -1,233 +1,283 @@
+
 /**
- * MindFlow - Focus & Relax Audio
- * Uses 10-hour looping audio files for continuous playback
+ * Focus Forge - Master Your Focus
+ * Timer + Task Management with Ambient Audio
  */
 
-// 10-hour audio sources for each category (infinite loop capability)
-const AUDIO_SOURCES = {
-    'focus': [
-        // Alpha waves - 10 hour focus music
-        'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3',
-        'https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3'
-    ],
-    'relax': [
-        // Ambient relaxation - 10 hour
-        'https://cdn.pixabay.com/audio/2021/08/09/audio_0c6a2d3473.mp3',
-        'https://cdn.pixabay.com/audio/2022/02/07/audio_12e164e89c.mp3'
-    ],
-    'sleep': [
-        // Delta waves - deep sleep music
-        'https://cdn.pixabay.com/audio/2021/11/23/audio_6c14f1f6f0.mp3',
-        'https://cdn.pixabay.com/audio/2022/01/18/audio_d0c6ff1e65.mp3'
-    ],
-    'meditate': [
-        // Theta waves - meditation music
-        'https://cdn.pixabay.com/audio/2022/03/09/audio_c8c8a73467.mp3',
-        'https://cdn.pixabay.com/audio/2021/09/07/audio_6b0d0e3e2f.mp3'
-    ],
-    'power': [
-        // Deep rest - power nap
-        'https://cdn.pixabay.com/audio/2022/05/15/audio_6c5c4d3b2a.mp3',
-        'https://cdn.pixabay.com/audio/2021/08/04/audio_5a4b3c2d1e.mp3'
-    ]
-};
-
-// Fallback noise generator for when audio fails
-function createNoiseBuffer(type = 'brown') {
-    if (!state.audioContext) {
-        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    
-    const bufferSize = 2 * state.audioContext.sampleRate;
-    const buffer = state.audioContext.createBuffer(1, bufferSize, state.audioContext.sampleRate);
-    const output = buffer.getChannelData(0);
-    
-    let lastOut = 0;
-    for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        if (type === 'brown') {
-            output[i] = (lastOut + (0.02 * white)) / 1.02;
-            lastOut = output[i];
-            output[i] *= 3.5;
-        } else if (type === 'pink') {
-            const b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-            // Simplified pink noise
-            output[i] = white * 0.5;
-        } else {
-            output[i] = white;
-        }
-    }
-    
-    return buffer;
-}
+// Task storage
+let tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
 
 // App State
 const state = {
+    timerTime: 25 * 60,
+    timerTotal: 25 * 60,
+    timerInterval: null,
+    isTimerRunning: false,
     currentCategory: 'focus',
-    isPlaying: false,
-    audioElement: null,
-    gainNode: null,
-    volume: 0.7,
-    currentTrackIndex: 0,
+    volume: 0.5,
     audioContext: null,
-    noiseNode: null,
-    isUsingNoise: false
+    audioNodes: []
+};
+
+// Category sound configurations
+const CATEGORY_CONFIGS = {
+    'focus': { baseFreq: 110, beatFreq: 7, noiseType: null },
+    'relax': { baseFreq: 130.81, beatFreq: 6, noiseType: 'pink' },
+    'sleep': { baseFreq: 98, beatFreq: 2, noiseType: 'brown' },
+    'meditate': { baseFreq: 146.83, beatFreq: 5, noiseType: 'pink' },
+    'power': { baseFreq: 87.31, beatFreq: 3, noiseType: 'brown' }
 };
 
 // DOM Elements
 const elements = {
+    timerMinutes: document.getElementById('timerMinutes'),
+    timerSeconds: document.getElementById('timerSeconds'),
+    timerRing: document.getElementById('timerRing'),
+    timerRingContainer: document.querySelector('.timer-ring-container'),
     playBtn: document.getElementById('playBtn'),
     playIcon: document.querySelector('.play-icon'),
     pauseIcon: document.querySelector('.pause-icon'),
-    prevBtn: document.getElementById('prevBtn'),
-    nextBtn: document.getElementById('nextBtn'),
     categories: document.querySelectorAll('.category'),
-    volumeSlider: document.getElementById('volumeSlider')
+    presetBtns: document.querySelectorAll('.preset-btn'),
+    taskInput: document.getElementById('taskInput'),
+    addTaskBtn: document.getElementById('addTaskBtn'),
+    taskList: document.getElementById('taskList'),
+    completedCount: document.getElementById('completedCount'),
+    totalCount: document.getElementById('totalCount'),
+    volumeSlider: document.getElementById('volumeSlider'),
+    modal: document.getElementById('customTimerModal'),
+    customHours: document.getElementById('customHours'),
+    customMinutes: document.getElementById('customMinutes'),
+    customSeconds: document.getElementById('customSeconds'),
+    cancelTimer: document.getElementById('cancelTimer'),
+    setTimer: document.getElementById('setTimer')
 };
 
 // Initialize Audio Context
 function initAudioContext() {
     if (!state.audioContext) {
         state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        state.gainNode = state.audioContext.createGain();
-        state.gainNode.gain.value = state.volume;
+        state.masterGain = state.audioContext.createGain();
+        state.masterGain.gain.value = state.volume;
+        state.masterGain.connect(state.audioContext.destination);
+    }
+    if (state.audioContext.state === 'suspended') {
+        state.audioContext.resume();
     }
 }
 
-// Play noise fallback
-function playNoise(type = 'brown') {
+// Generate noise buffers
+function createPinkNoise() {
+    const bufferSize = 4 * state.audioContext.sampleRate;
+    const buffer = state.audioContext.createBuffer(1, bufferSize, state.audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    
+    for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+        data[i] *= 0.11;
+        b6 = white * 0.115926;
+    }
+    
+    return buffer;
+}
+
+function createBrownNoise() {
+    const bufferSize = 4 * state.audioContext.sampleRate;
+    const buffer = state.audioContext.createBuffer(1, bufferSize, state.audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    let lastOut = 0;
+    
+    for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (lastOut + (0.02 * white)) / 1.02;
+        lastOut = data[i];
+        data[i] *= 3.5;
+    }
+    
+    return buffer;
+}
+
+// Create ambient audio
+function createAmbientAudio(category) {
     initAudioContext();
-    stopAudio();
     
-    state.isUsingNoise = true;
+    const config = CATEGORY_CONFIGS[category];
+    const nodes = [];
     
-    const buffer = createNoiseBuffer(type);
-    const source = state.audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
+    // Binaural beat oscillators
+    const osc1 = state.audioContext.createOscillator();
+    const osc2 = state.audioContext.createOscillator();
+    const gain1 = state.audioContext.createGain();
+    const gain2 = state.audioContext.createGain();
+    const panner1 = state.audioContext.createStereoPanner();
+    const panner2 = state.audioContext.createStereoPanner();
     
-    // Add filter for warmth
-    const filter = state.audioContext.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = type === 'brown' ? 400 : 800;
+    osc1.frequency.value = config.baseFreq;
+    osc2.frequency.value = config.baseFreq + config.beatFreq;
+    osc1.type = 'sine';
+    osc2.type = 'sine';
     
-    source.connect(filter);
-    filter.connect(state.gainNode);
-    state.gainNode.connect(state.audioContext.destination);
+    panner1.pan.value = -1;
+    panner2.pan.value = 1;
+    gain1.gain.value = 0.15;
+    gain2.gain.value = 0.15;
     
-    source.start();
-    state.noiseNode = source;
-}
-
-// Play category audio
-function playCategory(category) {
-    initAudioContext();
-    stopAudio();
+    osc1.connect(gain1);
+    gain1.connect(panner1);
+    panner1.connect(state.masterGain);
     
-    const tracks = AUDIO_SOURCES[category];
-    const trackUrl = tracks[state.currentTrackIndex];
+    osc2.connect(gain2);
+    gain2.connect(panner2);
+    panner2.connect(state.masterGain);
     
-    state.isUsingNoise = false;
+    osc1.start();
+    osc2.start();
     
-    // Create audio element
-    state.audioElement = new Audio(trackUrl);
-    state.audioElement.loop = true;
-    state.audioElement.volume = state.volume;
+    nodes.push(osc1, osc2, gain1, gain2, panner1, panner2);
     
-    // Connect to audio context for better control
-    if (!state.gainNode) {
-        state.gainNode = state.audioContext.createGain();
-        state.gainNode.connect(state.audioContext.destination);
+    // Harmonic
+    const harmonic = state.audioContext.createOscillator();
+    const harmonicGain = state.audioContext.createGain();
+    
+    harmonic.frequency.value = config.baseFreq * 2;
+    harmonic.type = 'sine';
+    harmonicGain.gain.value = 0.05;
+    
+    harmonic.connect(harmonicGain);
+    harmonicGain.connect(state.masterGain);
+    harmonic.start();
+    
+    nodes.push(harmonic, harmonicGain);
+    
+    // Noise if configured
+    if (config.noiseType) {
+        const noiseBuffer = config.noiseType === 'brown' ? createBrownNoise() : createPinkNoise();
+        const noiseSource = state.audioContext.createBufferSource();
+        const noiseGain = state.audioContext.createGain();
+        const noiseFilter = state.audioContext.createBiquadFilter();
+        
+        noiseSource.buffer = noiseBuffer;
+        noiseSource.loop = true;
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.value = config.noiseType === 'brown' ? 400 : 600;
+        noiseGain.gain.value = config.noiseType === 'brown' ? 0.1 : 0.08;
+        
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(state.masterGain);
+        
+        noiseSource.start();
+        
+        nodes.push(noiseSource, noiseFilter, noiseGain);
     }
     
-    // Try to play with Web Audio API for continuous looping
-    state.audioElement.play().then(() => {
-        // Audio playing successfully
-        fadeIn();
-    }).catch(err => {
-        console.log('Audio file failed, using noise generator:', err);
-        // Fallback to noise generator
-        playNoise(category === 'focus' || category === 'relax' ? 'brown' : 'pink');
-    });
+    return nodes;
 }
 
-function fadeIn() {
-    if (!state.audioElement || state.isUsingNoise) return;
+function startAudio() {
+    if (state.audioNodes.length > 0) return;
+    state.audioNodes = createAmbientAudio(state.currentCategory);
     
-    state.audioElement.volume = 0;
-    
-    const fadeInterval = setInterval(() => {
-        if (state.audioElement && state.audioElement.volume < state.volume - 0.05) {
-            state.audioElement.volume += 0.02;
-        } else {
-            if (state.audioElement) {
-                state.audioElement.volume = state.volume;
-            }
-            clearInterval(fadeInterval);
-        }
-    }, 50);
-}
-
-function fadeOut(callback) {
-    if (state.isUsingNoise && state.noiseNode) {
-        const gain = state.gainNode;
-        const startTime = state.audioContext.currentTime;
-        
-        gain.gain.linearRampToValueAtTime(0, startTime + 1);
-        
-        setTimeout(() => {
-            callback();
-        }, 1100);
-    } else if (state.audioElement) {
-        const startVol = state.audioElement.volume;
-        const fadeInterval = setInterval(() => {
-            if (state.audioElement && state.audioElement.volume > 0.05) {
-                state.audioElement.volume -= 0.02;
-            } else {
-                if (state.audioElement) {
-                    state.audioElement.volume = 0;
-                }
-                clearInterval(fadeInterval);
-                callback();
-            }
-        }, 50);
-    } else {
-        callback();
-    }
+    const startTime = state.audioContext.currentTime;
+    state.masterGain.gain.setValueAtTime(0, startTime);
+    state.masterGain.gain.linearRampToValueAtTime(state.volume, startTime + 2);
 }
 
 function stopAudio() {
-    if (state.isUsingNoise && state.noiseNode) {
-        try {
-            state.noiseNode.stop();
-            state.noiseNode.disconnect();
-        } catch (e) {}
-        state.noiseNode = null;
-    }
-    
-    if (state.audioElement) {
-        state.audioElement.pause();
-        state.audioElement.currentTime = 0;
-        state.audioElement = null;
+    if (state.audioNodes.length > 0) {
+        const startTime = state.audioContext.currentTime;
+        state.masterGain.gain.linearRampToValueAtTime(0, startTime + 1);
+        
+        setTimeout(() => {
+            state.audioNodes.forEach(node => {
+                try {
+                    if (node.stop) node.stop();
+                    if (node.disconnect) node.disconnect();
+                } catch (e) {}
+            });
+            state.audioNodes = [];
+        }, 1100);
     }
 }
 
-function togglePlay() {
-    if (state.isPlaying) {
-        fadeOut(() => {
+// Timer Functions
+function updateTimerDisplay() {
+    const minutes = Math.floor(state.timerTime / 60);
+    const seconds = state.timerTime % 60;
+    elements.timerMinutes.textContent = minutes.toString().padStart(2, '0');
+    elements.timerSeconds.textContent = seconds.toString().padStart(2, '0');
+}
+
+function updateTimerRing() {
+    const circumference = 2 * Math.PI * 90;
+    const progress = state.timerTotal > 0 ? (state.timerTotal - state.timerTime) / state.timerTotal : 0;
+    const offset = circumference * (1 - Math.min(progress, 1));
+    elements.timerRing.style.strokeDashoffset = offset;
+}
+
+function startTimer() {
+    clearInterval(state.timerInterval);
+    state.timerInterval = setInterval(() => {
+        if (state.timerTime > 0) {
+            state.timerTime--;
+            updateTimerDisplay();
+            updateTimerRing();
+        } else {
+            // Timer complete
+            clearInterval(state.timerInterval);
+            state.isTimerRunning = false;
             stopAudio();
-            state.isPlaying = false;
             updatePlayButton();
-        });
+            showTimerComplete();
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(state.timerInterval);
+}
+
+function setTimer(minutes, seconds = 0) {
+    stopTimer();
+    state.timerTime = minutes * 60 + seconds;
+    state.timerTotal = state.timerTime;
+    updateTimerDisplay();
+    updateTimerRing();
+    
+    // Update preset buttons
+    elements.presetBtns.forEach(btn => {
+        const btnMinutes = parseInt(btn.dataset.time);
+        btn.classList.toggle('active', btnMinutes === minutes && seconds === 0);
+    });
+}
+
+function toggleTimer() {
+    if (state.isTimerRunning) {
+        // Stop
+        stopTimer();
+        stopAudio();
+        state.isTimerRunning = false;
     } else {
-        playCategory(state.currentCategory);
-        state.isPlaying = true;
-        updatePlayButton();
+        // Start
+        startAudio();
+        startTimer();
+        state.isTimerRunning = true;
     }
+    updatePlayButton();
 }
 
 function updatePlayButton() {
-    if (state.isPlaying) {
+    if (state.isTimerRunning) {
         elements.playIcon.style.display = 'none';
         elements.pauseIcon.style.display = 'block';
     } else {
@@ -236,68 +286,187 @@ function updatePlayButton() {
     }
 }
 
-function setVolume(value) {
-    state.volume = value / 100;
-    if (state.audioElement && !state.isUsingNoise) {
-        state.audioElement.volume = state.volume;
-    }
-    if (state.gainNode) {
-        state.gainNode.gain.value = state.volume;
-    }
+function showTimerComplete() {
+    const notification = document.createElement('div');
+    notification.className = 'complete-notification';
+    notification.textContent = '⏱️ Session Complete!';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 4000);
 }
 
-// Category Navigation
-function setCategory(category) {
-    state.currentCategory = category;
-    state.currentTrackIndex = 0;
+// Task Functions
+function saveTasks() {
+    localStorage.setItem('focusForgeTasks', JSON.stringify(tasks));
+}
+
+function renderTasks() {
+    elements.taskList.innerHTML = '';
     
-    // Update UI
-    elements.categories.forEach(cat => {
-        cat.classList.toggle('active', cat.dataset.category === category);
+    tasks.forEach((task, index) => {
+        const taskEl = document.createElement('div');
+        taskEl.className = `task-item${task.completed ? ' completed' : ''}`;
+        taskEl.innerHTML = `
+            <div class="task-checkbox${task.completed ? ' checked' : ''}" data-index="${index}">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3"/>
+                </svg>
+            </div>
+            <span class="task-text">${escapeHtml(task.text)}</span>
+            <button class="task-delete" data-index="${index}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        `;
+        elements.taskList.appendChild(taskEl);
     });
     
-    // If playing, switch audio
-    if (state.isPlaying) {
-        playCategory(category);
+    updateTaskStats();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function updateTaskStats() {
+    const completed = tasks.filter(t => t.completed).length;
+    elements.completedCount.textContent = completed;
+    elements.totalCount.textContent = tasks.length;
+}
+
+function addTask(text) {
+    if (text.trim()) {
+        tasks.push({ text: text.trim(), completed: false });
+        saveTasks();
+        renderTasks();
     }
 }
 
-function nextCategory() {
-    const categories = Object.keys(AUDIO_SOURCES);
-    const currentIndex = categories.indexOf(state.currentCategory);
-    const nextIndex = (currentIndex + 1) % categories.length;
-    setCategory(categories[nextIndex]);
+function toggleTask(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
 }
 
-function prevCategory() {
-    const categories = Object.keys(AUDIO_SOURCES);
-    const currentIndex = categories.indexOf(state.currentCategory);
-    const prevIndex = (currentIndex - 1 + categories.length) % categories.length;
-    setCategory(categories[prevIndex]);
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
 }
 
 // Event Listeners
 function initEventListeners() {
     // Play/Pause
-    elements.playBtn.addEventListener('click', togglePlay);
+    elements.playBtn.addEventListener('click', toggleTimer);
     
-    // Prev/Next
-    elements.prevBtn.addEventListener('click', prevCategory);
-    elements.nextBtn.addEventListener('click', nextCategory);
-    
-    // Categories
+    // Category selection
     elements.categories.forEach(cat => {
         cat.addEventListener('click', () => {
-            setCategory(cat.dataset.category);
+            const category = cat.dataset.category;
+            
+            // Update active state
+            elements.categories.forEach(c => c.classList.remove('active'));
+            cat.classList.add('active');
+            
+            // Update audio
+            state.currentCategory = category;
+            if (state.isTimerRunning) {
+                stopAudio();
+                startAudio();
+            }
         });
     });
     
-    // Volume
-    if (elements.volumeSlider) {
-        elements.volumeSlider.addEventListener('input', (e) => {
-            setVolume(e.target.value);
+    // Preset buttons
+    elements.presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            setTimer(parseInt(btn.dataset.time));
         });
-    }
+    });
+    
+    // Custom timer modal
+    elements.timerRingContainer.addEventListener('click', () => {
+        const totalSeconds = state.timerTotal;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        elements.customHours.value = hours;
+        elements.customMinutes.value = minutes;
+        elements.customSeconds.value = seconds;
+        
+        elements.modal.classList.add('active');
+    });
+    
+    elements.cancelTimer.addEventListener('click', () => {
+        elements.modal.classList.remove('active');
+    });
+    
+    elements.setTimer.addEventListener('click', () => {
+        const hours = parseInt(elements.customHours.value) || 0;
+        const minutes = parseInt(elements.customMinutes.value) || 0;
+        const seconds = parseInt(elements.customSeconds.value) || 0;
+        
+        const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+        if (totalSeconds > 0) {
+            stopTimer();
+            state.timerTime = totalSeconds;
+            state.timerTotal = totalSeconds;
+            updateTimerDisplay();
+            updateTimerRing();
+            
+            // Update presets
+            elements.presetBtns.forEach(btn => btn.classList.remove('active'));
+        }
+        
+        elements.modal.classList.remove('active');
+    });
+    
+    // Close modal on backdrop click
+    elements.modal.addEventListener('click', (e) => {
+        if (e.target === elements.modal) {
+            elements.modal.classList.remove('active');
+        }
+    });
+    
+    // Task input
+    elements.addTaskBtn.addEventListener('click', () => {
+        addTask(elements.taskInput.value);
+        elements.taskInput.value = '';
+    });
+    
+    elements.taskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addTask(elements.taskInput.value);
+            elements.taskInput.value = '';
+        }
+    });
+    
+    // Task delegation
+    elements.taskList.addEventListener('click', (e) => {
+        const checkbox = e.target.closest('.task-checkbox');
+        const deleteBtn = e.target.closest('.task-delete');
+        
+        if (checkbox) {
+            toggleTask(parseInt(checkbox.dataset.index));
+        } else if (deleteBtn) {
+            deleteTask(parseInt(deleteBtn.dataset.index));
+        }
+    });
+    
+    // Volume
+    elements.volumeSlider.addEventListener('input', (e) => {
+        state.volume = e.target.value / 100;
+        if (state.masterGain) {
+            state.masterGain.gain.value = state.volume;
+        }
+    });
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
@@ -306,13 +475,7 @@ function initEventListeners() {
         switch(e.code) {
             case 'Space':
                 e.preventDefault();
-                togglePlay();
-                break;
-            case 'ArrowLeft':
-                prevCategory();
-                break;
-            case 'ArrowRight':
-                nextCategory();
+                toggleTimer();
                 break;
         }
     });
@@ -321,11 +484,9 @@ function initEventListeners() {
 // Initialize
 function init() {
     initEventListeners();
-    
-    // Set initial active category
-    elements.categories.forEach(cat => {
-        cat.classList.toggle('active', cat.dataset.category === state.currentCategory);
-    });
+    updateTimerDisplay();
+    updateTimerRing();
+    renderTasks();
 }
 
 // Start
