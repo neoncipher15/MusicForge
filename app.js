@@ -275,12 +275,8 @@ let tasks = [];
 
 // App State
 const state = {
-    timerTime: 25 * 60,
-    timerTotal: 25 * 60,
-    timerInterval: null,
-    isTimerRunning: false,
-    volume: 0.5,
-    soundEnabled: true
+    soundEnabled: true,
+    updateInterval: null
 };
 
 // ==========================================
@@ -319,48 +315,68 @@ const elements = {
 };
 
 // ==========================================
-// TIMER FUNCTIONS
+// TIMER FUNCTIONS (using shared Timer module)
 // ==========================================
 
 function updateTimerDisplay() {
-    const minutes = Math.floor(state.timerTime / 60);
-    const seconds = state.timerTime % 60;
-    elements.timerMinutes.textContent = minutes.toString().padStart(2, '0');
-    elements.timerSeconds.textContent = seconds.toString().padStart(2, '0');
+    const timerState = Timer.getState();
+    const formatted = Timer.formatTime(timerState.timeRemaining);
+    elements.timerMinutes.textContent = formatted.minutes;
+    elements.timerSeconds.textContent = formatted.seconds;
 }
 
 function updateTimerRing() {
+    const progress = Timer.getProgress();
     const circumference = 2 * Math.PI * 90;
-    const progress = state.timerTotal > 0 ? (state.timerTotal - state.timerTime) / state.timerTotal : 0;
     const offset = circumference * (1 - Math.min(progress, 1));
     elements.timerRing.style.strokeDashoffset = offset;
 }
 
-function startTimer() {
-    clearInterval(state.timerInterval);
-    state.timerInterval = setInterval(() => {
-        if (state.timerTime > 0) {
-            state.timerTime--;
-            updateTimerDisplay();
-            updateTimerRing();
-        } else {
-            // Timer complete
-            clearInterval(state.timerInterval);
-            state.isTimerRunning = false;
-            updatePlayButton();
-            showTimerComplete();
-        }
-    }, 1000);
+function updatePlayButton() {
+    const isRunning = Timer.isRunning();
+    if (isRunning) {
+        elements.playIcon.style.display = 'none';
+        elements.pauseIcon.style.display = 'block';
+    } else {
+        elements.playIcon.style.display = 'block';
+        elements.pauseIcon.style.display = 'none';
+    }
 }
 
-function stopTimer() {
-    clearInterval(state.timerInterval);
+function toggleTimer() {
+    const timerState = Timer.getState();
+    
+    if (timerState.isRunning) {
+        Timer.stop();
+    } else {
+        // Check if timer is at start (not completed yet)
+        if (timerState.timeRemaining <= 0) {
+            // Timer completed, reset and start fresh
+            const userId = getCurrentUserId();
+            const settings = userId ? getUserSettings(userId) : { timerDuration: 25 };
+            const duration = (settings.timerDuration || 25) * 60;
+            Timer.setDuration(duration);
+        }
+        Timer.start();
+    }
+    updateTimerDisplay();
+    updatePlayButton();
+}
+
+function resetTimer() {
+    const userId = getCurrentUserId();
+    const settings = userId ? getUserSettings(userId) : { timerDuration: 25 };
+    const duration = (settings.timerDuration || 25) * 60;
+    Timer.reset();
+    Timer.setDuration(duration);
+    updateTimerDisplay();
+    updateTimerRing();
+    updatePlayButton();
 }
 
 function setTimer(minutes, seconds = 0) {
-    stopTimer();
-    state.timerTime = minutes * 60 + seconds;
-    state.timerTotal = state.timerTime;
+    const totalSeconds = minutes * 60 + seconds;
+    Timer.setDuration(totalSeconds);
     updateTimerDisplay();
     updateTimerRing();
     
@@ -369,29 +385,6 @@ function setTimer(minutes, seconds = 0) {
         const btnMinutes = parseInt(btn.dataset.time);
         btn.classList.toggle('active', btnMinutes === minutes && seconds === 0);
     });
-}
-
-function toggleTimer() {
-    if (state.isTimerRunning) {
-        // Stop
-        stopTimer();
-        state.isTimerRunning = false;
-    } else {
-        // Start
-        startTimer();
-        state.isTimerRunning = true;
-    }
-    updatePlayButton();
-}
-
-function updatePlayButton() {
-    if (state.isTimerRunning) {
-        elements.playIcon.style.display = 'none';
-        elements.pauseIcon.style.display = 'block';
-    } else {
-        elements.playIcon.style.display = 'block';
-        elements.pauseIcon.style.display = 'none';
-    }
 }
 
 function showTimerComplete() {
@@ -409,6 +402,9 @@ function showTimerComplete() {
     setTimeout(() => {
         notification.remove();
     }, 3000);
+    
+    // Update play button
+    updatePlayButton();
 }
 
 // Save session data to user-specific storage
@@ -416,10 +412,11 @@ function saveSessionData() {
     const userId = getCurrentUserId();
     if (!userId) return;
     
+    const timerState = Timer.getState();
     const session = {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
-        duration: Math.floor(state.timerTotal / 60), // in minutes
+        duration: Math.floor(timerState.totalTime / 60), // in minutes
         completedAt: new Date().toISOString()
     };
     
@@ -431,7 +428,10 @@ function saveSessionData() {
 // ==========================================
 
 function playSessionCompleteSound() {
-    if (!state.soundEnabled) return;
+    const userId = getCurrentUserId();
+    const settings = userId ? getUserSettings(userId) : { soundEnabled: true };
+    
+    if (!settings.soundEnabled) return;
     
     // Create audio context
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -473,29 +473,20 @@ function playSessionCompleteSound() {
 }
 
 function toggleSound() {
-    state.soundEnabled = !state.soundEnabled;
-    
-    // Save to user settings
     const userId = getCurrentUserId();
-    if (userId) {
-        saveUserSettings(userId, { soundEnabled: state.soundEnabled });
-    }
-    
+    const settings = getUserSettings(userId);
+    const newSoundEnabled = !settings.soundEnabled;
+    saveUserSettings(userId, { soundEnabled: newSoundEnabled });
+    state.soundEnabled = newSoundEnabled;
     updateSoundButton();
-}
-
-function resetTimer() {
-    stopTimer();
-    state.isTimerRunning = false;
-    state.timerTime = state.timerTotal;
-    updateTimerDisplay();
-    updateTimerRing();
-    updatePlayButton();
 }
 
 function updateSoundButton() {
     if (elements.soundBtn) {
-        if (state.soundEnabled) {
+        const userId = getCurrentUserId();
+        const settings = userId ? getUserSettings(userId) : { soundEnabled: true };
+        
+        if (settings.soundEnabled !== false) {
             elements.soundBtn.classList.remove('muted');
             elements.soundOn.style.display = 'block';
             elements.soundOff.style.display = 'none';
@@ -603,7 +594,8 @@ function initEventListeners() {
     
     // Custom timer modal
     elements.timerRingContainer.addEventListener('click', () => {
-        const totalSeconds = state.timerTotal;
+        const timerState = Timer.getState();
+        const totalSeconds = timerState.totalTime;
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
@@ -626,9 +618,7 @@ function initEventListeners() {
         
         const totalSeconds = hours * 3600 + minutes * 60 + seconds;
         if (totalSeconds > 0) {
-            stopTimer();
-            state.timerTime = totalSeconds;
-            state.timerTotal = totalSeconds;
+            Timer.setDuration(totalSeconds);
             updateTimerDisplay();
             updateTimerRing();
             
@@ -736,9 +726,26 @@ async function init() {
     // Initialize intro screen first (waits for completion if first visit today)
     await initIntroScreen();
     
-    initEventListeners();
+    // Initialize timer display
     updateTimerDisplay();
     updateTimerRing();
+    updatePlayButton();
+    
+    // Update timer display every second
+    state.updateInterval = setInterval(() => {
+        const timerState = Timer.getState();
+        
+        // Check if timer completed
+        if (timerState.timeRemaining <= 0 && timerState.isRunning) {
+            Timer.stop();
+            showTimerComplete();
+        }
+        
+        updateTimerDisplay();
+        updatePlayButton();
+    }, 1000);
+    
+    initEventListeners();
     renderTasks();
     updateSoundButton();
 }

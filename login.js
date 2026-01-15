@@ -157,6 +157,7 @@ function registerUser(name, email, password) {
     const newUser = {
         id: Date.now(),
         name: name.trim(),
+        displayName: name.trim(), // For leaderboard display
         email: email.trim().toLowerCase(),
         password: password, // In production, this should be hashed
         createdAt: new Date().toISOString()

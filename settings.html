@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Focus Forge</title>
+    <link rel="icon" href="./image.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="settings-bg">
+        <div class="settings-glow glow-1"></div>
+        <div class="settings-glow glow-2"></div>
+        <div class="settings-glow glow-3"></div>
+    </div>
+
+    <!-- Transparent Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span>Focus Forge</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="tasks.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Tasks</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+                <span>Calendar</span>
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                <span>Analytics</span>
+            </a>
+            <a href="leaderboard.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.5 21H2V9h5.5V21zm7.5 0H12V3H15v18zM22 1h-5.5v20H22V1z"/>
+                </svg>
+                <span>Leaderboard</span>
+            </a>
+            <a href="settings.html" class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/>
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="nav-item donation-trigger" id="sidebarDonation">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                <span>Donate</span>
+            </button>
+            <button class="nav-item logout-trigger" id="sidebarLogout">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <div class="app-container settings-container">
+            <div class="settings-header">
+                <h1>Settings</h1>
+                <p>Customize your Focus Forge experience</p>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Profile Card -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <h2>Profile</h2>
+                    </div>
+                    <div class="settings-card-content">
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <div class="input-wrapper">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                                <input type="text" id="displayName" placeholder="Enter your name">
+                            </div>
+                        </div>
+                        <button class="settings-btn primary" id="saveProfile">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Save Profile
+                        </button>
+                        <p class="settings-message" id="profileMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Timer Settings -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                        </svg>
+                        <h2>Timer</h2>
+                    </div>
+                    <div class="settings-card-content">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Default Timer Duration</span>
+                                <span class="setting-desc">Length of focus sessions</span>
+                            </div>
+                            <select class="settings-select" id="timerDuration">
+                                <option value="15">15 minutes</option>
+                                <option value="25" selected>25 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">60 minutes</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Sound Effects</span>
+                                <span class="setting-desc">Play sound when timer ends</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soundEnabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <button class="settings-btn primary" id="saveTimerSettings">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Save Timer Settings
+                        </button>
+                        <p class="settings-message" id="timerMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Export/Import Data -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        <h2>Export / Import Data</h2>
+                    </div>
+                    <div class="settings-card-content">
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.875rem; margin-bottom: 1rem;">
+                            Export your data to a file and import it on another device. This includes all your tasks, sessions, and settings.
+                        </p>
+                        <button class="settings-btn secondary" id="exportData" style="width: 100%; margin-bottom: 0.75rem;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Export All Data
+                        </button>
+                        <label class="settings-btn secondary" style="width: 100%; display: flex; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-right: 0.5rem;">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Import Data
+                            <input type="file" id="importData" accept=".json" style="display: none;">
+                        </label>
+                        <p class="settings-message" id="dataMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Your Stats -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                        <h2>Your Stats</h2>
+                    </div>
+                    <div class="settings-card-content">
+                        <div class="stats-summary">
+                            <div class="stat-box">
+                                <span class="stat-number" id="totalSessionsStat">0</span>
+                                <span class="stat-label">Sessions</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="totalHoursStat">0h</span>
+                                <span class="stat-label">Total Time</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="tasksCompletedStat">0</span>
+                                <span class="stat-label">Tasks Done</span>
+                            </div>
+                        </div>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; text-align: center;">
+                            All data is stored locally in your browser
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal donation-modal" id="donationModal">
+        <div class="donation-content">
+            <button class="donation-close" id="donationClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <h2>Support Focus Forge ❤️</h2>
+            <p class="donation-subtitle">Your donation helps us keep the timer running!</p>
+            <div class="qrcode-container">
+                <img src="./qr.png" alt="Donation QR Code" class="qrcode-img">
+            </div>
+            <p class="donation-thanks">Thank you for your generosity!</p>
+        </div>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>
+
