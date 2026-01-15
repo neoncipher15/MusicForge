@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar - Focus Forge</title>
+    <title>Leaderboard - Focus Forge</title>
     <link rel="icon" href="./image.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="animated-bg">
-        <div class="glow-orb glow-1"></div>
-        <div class="glow-orb glow-2"></div>
-        <div class="glow-orb glow-3"></div>
-    </div>
-
     <!-- Transparent Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-               
                 <span>Focus Forge</span>
             </div>
         </div>
@@ -35,9 +28,9 @@
                 </svg>
                 <span>Tasks</span>
             </a>
-            <a href="calendar.html" class="nav-item active">
+            <a href="calendar.html" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                 </svg>
                 <span>Calendar</span>
             </a>
@@ -46,6 +39,18 @@
                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                 </svg>
                 <span>Analytics</span>
+            </a>
+            <a href="leaderboard.html" class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.5 21H2V9h5.5V21zm7.5 0H12V3H15v18zM22 1h-5.5v20H22V1z"/>
+                </svg>
+                <span>Leaderboard</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/>
+                </svg>
+                <span>Settings</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -65,50 +70,49 @@
     </aside>
 
     <div class="main-wrapper">
-        <div class="app-container calendar-page-container">
-            <div class="page-header">
-                <h1>Calendar</h1>
-                <p>Schedule your tasks and focus sessions</p>
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <h1>Leaderboard</h1>
+                <p>See how you compare with other users</p>
             </div>
-            
-            <div class="calendar-container">
-                <div class="calendar-main">
-                    <!-- Month Selector Above Calendar -->
-                    <div class="calendar-month-selector">
-                        <button class="calendar-nav" id="prevMonth">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                            </svg>
-                        </button>
-                        <h2 id="currentMonth">January 2025</h2>
-                        <button class="calendar-nav" id="nextMonth">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <div class="calendar-scroll-wrapper">
-                        <div class="calendar-grid" id="calendarGrid">
-                        </div>
-                    </div>
+
+            <!-- User's Stats Card -->
+            <div class="user-stats-card">
+                <div class="user-avatar" id="userAvatar">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
                 </div>
-                
-                <div class="calendar-sidebar">
-                    <h3 id="selectedDateTitle">Select a date</h3>
-                    <div class="selected-date-tasks" id="selectedDateTasks">
-                        <p class="no-tasks">Click on a date to view tasks</p>
-                    </div>
-                    <div class="add-task-to-date">
-                        <input type="text" id="dateTaskInput" placeholder="Add task for this date...">
-                        <button id="addDateTaskBtn" class="add-date-task-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </button>
-                    </div>
+                <div class="user-info">
+                    <h2 id="currentUsername">User</h2>
+                    <p class="user-rank">Rank #<span id="currentRank">-</span></p>
                 </div>
+                <div class="user-time">
+                    <span class="time-value" id="userTotalHours">0</span>
+                    <span class="time-label">Hours</span>
+                </div>
+            </div>
+
+            <!-- Time Period Filter -->
+            <div class="leaderboard-filters">
+                <button class="filter-btn active" data-period="all">All Time</button>
+                <button class="filter-btn" data-period="month">This Month</button>
+                <button class="filter-btn" data-period="week">This Week</button>
+            </div>
+
+            <!-- Leaderboard List -->
+            <div class="leaderboard-list" id="leaderboardList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="leaderboard-empty" id="emptyState">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.5 21H2V9h5.5V21zm7.5 0H12V3H15v18zM22 1h-5.5v20H22V1z"/>
+                </svg>
+                <h3>No Users Yet</h3>
+                <p>Be the first to start your focus journey!</p>
+                <a href="index.html" class="empty-btn">Start Focusing</a>
             </div>
         </div>
     </div>
@@ -131,7 +135,7 @@
         </div>
     </div>
 
-    <script src="calendar.js"></script>
+    <script src="leaderboard.js"></script>
 </body>
 </html>
 

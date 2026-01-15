@@ -1,13 +1,84 @@
 /**
  * Focus Forge - Analytics Page
- * Track focus sessions and productivity
+ * Track focus sessions and productivity with user authentication
  */
 
-// Get analytics data from localStorage
+// ==========================================
+// AUTHENTICATION FUNCTIONS
+// ==========================================
+
+/**
+ * Get current session
+ */
+function getCurrentSession() {
+    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
+           JSON.parse(sessionStorage.getItem('focusForgeSession'));
+}
+
+/**
+ * Check if user is logged in
+ */
+function isLoggedIn() {
+    return getCurrentSession() !== null;
+}
+
+/**
+ * Get current user ID
+ */
+function getCurrentUserId() {
+    const session = getCurrentSession();
+    return session ? session.userId : null;
+}
+
+/**
+ * Redirect to login if not logged in
+ */
+function requireAuth() {
+    if (!isLoggedIn()) {
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * Logout user
+ */
+function logoutUser() {
+    localStorage.removeItem('focusForgeSession');
+    sessionStorage.removeItem('focusForgeSession');
+    window.location.href = 'login.html';
+}
+
+// ==========================================
+// USER DATA FUNCTIONS
+// ==========================================
+
+/**
+ * Get user data object
+ */
+function getUserData(userId) {
+    const key = `focusForgeData_${userId}`;
+    return JSON.parse(localStorage.getItem(key)) || {
+        tasks: [],
+        sessions: [],
+        scheduledTasks: {},
+        settings: {}
+    };
+}
+
+// ==========================================
+// ANALYTICS FUNCTIONS
+// ==========================================
+
+// Get analytics data from user-specific localStorage
 function getAnalyticsData() {
-    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
-    const tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
-    return { sessions, tasks };
+    const userId = getCurrentUserId();
+    if (!userId) return { sessions: [], tasks: [] };
+    
+    const data = getUserData(userId);
+    return { 
+        sessions: data.sessions || [], 
+        tasks: data.tasks || [] 
+    };
 }
 
 // Calculate total focus time in minutes
@@ -146,55 +217,21 @@ function updateStats(sessions, tasks) {
     document.getElementById('tasksCompleted').textContent = completedTasks;
 }
 
-// Simulate some data for demo (remove this in production)
-function simulateData() {
-    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
-    const tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
-    
-    // If no real data, add some demo data
-    if (sessions.length === 0 && tasks.length === 0) {
-        const today = new Date();
-        const demoSessions = [];
-        
-        // Generate demo sessions for the past week
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
-            
-            // Add 1-3 sessions per day
-            const numSessions = Math.floor(Math.random() * 3) + 1;
-            for (let j = 0; j < numSessions; j++) {
-                demoSessions.push({
-                    id: Date.now() + Math.random(),
-                    date: dateStr,
-                    duration: [25, 30, 45, 50, 60][Math.floor(Math.random() * 5)],
-                    completedAt: new Date(date.getTime() + Math.random() * 86400000).toISOString()
-                });
-            }
-        }
-        
-        localStorage.setItem('focusForgeSessions', JSON.stringify(demoSessions));
-        return { sessions: demoSessions, tasks };
-    }
-    
-    return { sessions, tasks };
-}
-
 // DOM Elements
 const elements = {
     donationModal: document.getElementById('donationModal'),
     donationClose: document.getElementById('donationClose'),
-    sidebarDonation: document.getElementById('sidebarDonation')
+    sidebarDonation: document.getElementById('sidebarDonation'),
+    sidebarLogout: document.getElementById('sidebarLogout')
 };
 
 // Initialize
 function init() {
-    // Load or simulate data
-    let { sessions, tasks } = getAnalyticsData();
+    // Check authentication
+    requireAuth();
     
-    // Uncomment below to use simulated data
-    // ({ sessions, tasks } = simulateData());
+    // Load data from user-specific storage
+    const { sessions, tasks } = getAnalyticsData();
     
     // Calculate and display stats
     updateStats(sessions, tasks);
@@ -212,6 +249,11 @@ function init() {
         elements.sidebarDonation.addEventListener('click', () => {
             elements.donationModal.classList.add('active');
         });
+    }
+    
+    // Logout button
+    if (elements.sidebarLogout) {
+        elements.sidebarLogout.addEventListener('click', logoutUser);
     }
     
     if (elements.donationClose) {

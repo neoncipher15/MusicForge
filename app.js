@@ -1,11 +1,7 @@
-
 /**
  * Focus Forge - Master Your Focus
- * Timer + Task Management
+ * Timer + Task Management with User Authentication
  */
-
-// Task storage
-let tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
 
 // ==========================================
 // AUTHENTICATION FUNCTIONS
@@ -27,6 +23,14 @@ function isLoggedIn() {
 }
 
 /**
+ * Get current user ID
+ */
+function getCurrentUserId() {
+    const session = getCurrentSession();
+    return session ? session.userId : null;
+}
+
+/**
  * Redirect to login if not logged in
  */
 function requireAuth() {
@@ -44,15 +48,83 @@ function logoutUser() {
     window.location.href = 'login.html';
 }
 
-// App State
-const state = {
-    timerTime: 25 * 60,
-    timerTotal: 25 * 60,
-    timerInterval: null,
-    isTimerRunning: false,
-    volume: 0.5,
-    soundEnabled: JSON.parse(localStorage.getItem('focusForgeSound')) !== false
-};
+// ==========================================
+// USER DATA FUNCTIONS
+// ==========================================
+
+/**
+ * Get user data object
+ */
+function getUserData(userId) {
+    const key = `focusForgeData_${userId}`;
+    return JSON.parse(localStorage.getItem(key)) || {
+        tasks: [],
+        sessions: [],
+        settings: {
+            soundEnabled: true,
+            timerDuration: 25
+        }
+    };
+}
+
+/**
+ * Save user data object
+ */
+function saveUserData(userId, data) {
+    const key = `focusForgeData_${userId}`;
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+/**
+ * Get user's tasks
+ */
+function getUserTasks(userId) {
+    const data = getUserData(userId);
+    return data.tasks || [];
+}
+
+/**
+ * Save user's tasks
+ */
+function saveUserTasks(userId, tasks) {
+    const data = getUserData(userId);
+    data.tasks = tasks;
+    saveUserData(userId, data);
+}
+
+/**
+ * Get user's sessions
+ */
+function getUserSessions(userId) {
+    const data = getUserData(userId);
+    return data.sessions || [];
+}
+
+/**
+ * Save user's session
+ */
+function saveUserSessionData(userId, session) {
+    const data = getUserData(userId);
+    data.sessions.push(session);
+    saveUserData(userId, data);
+}
+
+/**
+ * Get user's settings
+ */
+function getUserSettings(userId) {
+    const data = getUserData(userId);
+    return data.settings;
+}
+
+/**
+ * Save user's settings
+ */
+function saveUserSettings(userId, settings) {
+    const data = getUserData(userId);
+    data.settings = { ...data.settings, ...settings };
+    saveUserData(userId, data);
+}
 
 // ==========================================
 // INTRO SCREEN FUNCTIONS
@@ -60,17 +132,19 @@ const state = {
 
 /**
  * Check if this is the first visit today
- * @returns {boolean} true if user hasn't visited today
  */
 function isFirstVisitToday() {
+    const userId = getCurrentUserId();
+    if (!userId) return true;
+    
     const today = new Date().toISOString().split('T')[0];
-    const lastVisit = localStorage.getItem('focusForgeLastVisit');
+    const lastVisitKey = `focusForgeLastVisit_${userId}`;
+    const lastVisit = localStorage.getItem(lastVisitKey);
     return lastVisit !== today;
 }
 
 /**
  * Get today's date string
- * @returns {string} ISO date string (YYYY-MM-DD)
  */
 function getTodayDate() {
     return new Date().toISOString().split('T')[0];
@@ -80,20 +154,19 @@ function getTodayDate() {
  * Store today's date as the last visit date
  */
 function storeLastVisitDate() {
-    localStorage.setItem('focusForgeLastVisit', getTodayDate());
+    const userId = getCurrentUserId();
+    if (userId) {
+        const lastVisitKey = `focusForgeLastVisit_${userId}`;
+        localStorage.setItem(lastVisitKey, getTodayDate());
+    }
 }
 
 /**
  * Type text character by character with cursor
- * @param {string} text - Text to type
- * @param {HTMLElement} element - Element to display text
- * @param {number} duration - Total duration in ms
- * @returns {Promise} Resolves when typing is complete
  */
 function typeText(text, element, duration = 1800) {
     return new Promise((resolve) => {
         const charCount = text.length;
-        const charsPerMs = charCount / duration;
         let currentIndex = 0;
         
         // Add cursor
@@ -193,7 +266,27 @@ async function initIntroScreen() {
     }
 }
 
-// DOM Elements
+// ==========================================
+// APP STATE & DATA
+// ==========================================
+
+// Task storage - per user
+let tasks = [];
+
+// App State
+const state = {
+    timerTime: 25 * 60,
+    timerTotal: 25 * 60,
+    timerInterval: null,
+    isTimerRunning: false,
+    volume: 0.5,
+    soundEnabled: true
+};
+
+// ==========================================
+// DOM ELEMENTS
+// ==========================================
+
 const elements = {
     timerMinutes: document.getElementById('timerMinutes'),
     timerSeconds: document.getElementById('timerSeconds'),
@@ -225,7 +318,10 @@ const elements = {
     sidebarLogout: document.getElementById('sidebarLogout')
 };
 
-// Timer Functions
+// ==========================================
+// TIMER FUNCTIONS
+// ==========================================
+
 function updateTimerDisplay() {
     const minutes = Math.floor(state.timerTime / 60);
     const seconds = state.timerTime % 60;
@@ -315,20 +411,25 @@ function showTimerComplete() {
     }, 3000);
 }
 
-// Save session data to localStorage for analytics
+// Save session data to user-specific storage
 function saveSessionData() {
-    const sessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+    const userId = getCurrentUserId();
+    if (!userId) return;
+    
     const session = {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
         duration: Math.floor(state.timerTotal / 60), // in minutes
         completedAt: new Date().toISOString()
     };
-    sessions.push(session);
-    localStorage.setItem('focusForgeSessions', JSON.stringify(sessions));
+    
+    saveUserSessionData(userId, session);
 }
 
-// Sound Functions
+// ==========================================
+// SOUND FUNCTIONS
+// ==========================================
+
 function playSessionCompleteSound() {
     if (!state.soundEnabled) return;
     
@@ -373,7 +474,13 @@ function playSessionCompleteSound() {
 
 function toggleSound() {
     state.soundEnabled = !state.soundEnabled;
-    localStorage.setItem('focusForgeSound', state.soundEnabled);
+    
+    // Save to user settings
+    const userId = getCurrentUserId();
+    if (userId) {
+        saveUserSettings(userId, { soundEnabled: state.soundEnabled });
+    }
+    
     updateSoundButton();
 }
 
@@ -400,9 +507,15 @@ function updateSoundButton() {
     }
 }
 
-// Task Functions
+// ==========================================
+// TASK FUNCTIONS
+// ==========================================
+
 function saveTasks() {
-    localStorage.setItem('focusForgeTasks', JSON.stringify(tasks));
+    const userId = getCurrentUserId();
+    if (userId) {
+        saveUserTasks(userId, tasks);
+    }
 }
 
 function renderTasks() {
@@ -463,7 +576,10 @@ function deleteTask(index) {
     renderTasks();
 }
 
-// Event Listeners
+// ==========================================
+// EVENT LISTENERS
+// ==========================================
+
 function initEventListeners() {
     // Play/Pause
     elements.playBtn.addEventListener('click', toggleTimer);
@@ -567,7 +683,7 @@ function initEventListeners() {
         }
     });
     
-// Donation modal
+    // Donation modal
     if (elements.donationBtn) {
         elements.donationBtn.addEventListener('click', () => {
             elements.donationModal.classList.add('active');
@@ -597,10 +713,25 @@ function initEventListeners() {
     });
 }
 
-// Initialize
+// ==========================================
+// INITIALIZATION
+// ==========================================
+
 async function init() {
     // Check authentication - redirect to login if not logged in
     requireAuth();
+    
+    // Load user data
+    const userId = getCurrentUserId();
+    if (userId) {
+        tasks = getUserTasks(userId);
+        
+        // Load user settings
+        const settings = getUserSettings(userId);
+        if (settings) {
+            state.soundEnabled = settings.soundEnabled !== false;
+        }
+    }
     
     // Initialize intro screen first (waits for completion if first visit today)
     await initIntroScreen();

@@ -1,7 +1,120 @@
 /**
  * Focus Forge - Authentication Module
- * Handles login, signup, and session management
+ * Handles login, signup, session management, and per-user data
  */
+
+// ==========================================
+// USER DATA FUNCTIONS
+// ==========================================
+
+/**
+ * Get user data object for a specific user
+ */
+function getUserData(userId) {
+    const key = `focusForgeData_${userId}`;
+    return JSON.parse(localStorage.getItem(key)) || {
+        tasks: [],
+        sessions: [],
+        settings: {
+            soundEnabled: true,
+            timerDuration: 25,
+            theme: 'dark'
+        }
+    };
+}
+
+/**
+ * Save user data object
+ */
+function saveUserData(userId, data) {
+    const key = `focusForgeData_${userId}`;
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+/**
+ * Get user's tasks
+ */
+function getUserTasks(userId) {
+    const data = getUserData(userId);
+    return data.tasks || [];
+}
+
+/**
+ * Save user's tasks
+ */
+function saveUserTasks(userId, tasks) {
+    const data = getUserData(userId);
+    data.tasks = tasks;
+    saveUserData(userId, data);
+}
+
+/**
+ * Get user's sessions
+ */
+function getUserSessions(userId) {
+    const data = getUserData(userId);
+    return data.sessions || [];
+}
+
+/**
+ * Save user's session
+ */
+function saveUserSession(userId, session) {
+    const data = getUserData(userId);
+    data.sessions.push(session);
+    saveUserData(userId, data);
+}
+
+/**
+ * Get user's settings
+ */
+function getUserSettings(userId) {
+    const data = getUserData(userId);
+    return data.settings;
+}
+
+/**
+ * Save user's settings
+ */
+function saveUserSettings(userId, settings) {
+    const data = getUserData(userId);
+    data.settings = { ...data.settings, ...settings };
+    saveUserData(userId, data);
+}
+
+/**
+ * Migrate old global data to current user
+ */
+function migrateGlobalData(userId) {
+    // Migrate tasks
+    const globalTasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
+    if (globalTasks.length > 0) {
+        const userTasks = getUserTasks(userId);
+        if (userTasks.length === 0) {
+            saveUserTasks(userId, globalTasks);
+        }
+    }
+    
+    // Migrate sessions
+    const globalSessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+    if (globalSessions.length > 0) {
+        const userSessions = getUserSessions(userId);
+        if (userSessions.length === 0) {
+            const data = getUserData(userId);
+            data.sessions = globalSessions;
+            saveUserData(userId, data);
+        }
+    }
+    
+    // Migrate sound setting
+    const soundEnabled = JSON.parse(localStorage.getItem('focusForgeSound'));
+    if (soundEnabled !== null) {
+        const settings = getUserSettings(userId);
+        if (settings.soundEnabled === true) {
+            saveUserSettings(userId, { soundEnabled });
+        }
+    }
+}
 
 // ==========================================
 // AUTHENTICATION FUNCTIONS
@@ -52,6 +165,9 @@ function registerUser(name, email, password) {
     users.push(newUser);
     saveUsers(users);
     
+    // Initialize user data
+    getUserData(newUser.id); // Creates empty data structure
+    
     return { success: true, message: 'Account created successfully' };
 }
 
@@ -82,6 +198,9 @@ function loginUser(email, password, remember) {
     } else {
         sessionStorage.setItem('focusForgeSession', JSON.stringify(session));
     }
+    
+    // Migrate any global data to this user
+    migrateGlobalData(user.id);
     
     return { success: true, message: 'Login successful', user: session };
 }

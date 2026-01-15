@@ -1,11 +1,101 @@
 /**
  * Focus Forge - Calendar Page
- * Schedule tasks and view them by date
+ * Schedule tasks and view them by date with user authentication
  */
 
-// Get data from localStorage
-let scheduledTasks = JSON.parse(localStorage.getItem('focusForgeScheduledTasks')) || {};
-let allTasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || {};
+// ==========================================
+// AUTHENTICATION FUNCTIONS
+// ==========================================
+
+/**
+ * Get current session
+ */
+function getCurrentSession() {
+    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
+           JSON.parse(sessionStorage.getItem('focusForgeSession'));
+}
+
+/**
+ * Check if user is logged in
+ */
+function isLoggedIn() {
+    return getCurrentSession() !== null;
+}
+
+/**
+ * Get current user ID
+ */
+function getCurrentUserId() {
+    const session = getCurrentSession();
+    return session ? session.userId : null;
+}
+
+/**
+ * Redirect to login if not logged in
+ */
+function requireAuth() {
+    if (!isLoggedIn()) {
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * Logout user
+ */
+function logoutUser() {
+    localStorage.removeItem('focusForgeSession');
+    sessionStorage.removeItem('focusForgeSession');
+    window.location.href = 'login.html';
+}
+
+// ==========================================
+// USER DATA FUNCTIONS
+// ==========================================
+
+/**
+ * Get user data object
+ */
+function getUserData(userId) {
+    const key = `focusForgeData_${userId}`;
+    return JSON.parse(localStorage.getItem(key)) || {
+        scheduledTasks: {},
+        sessions: [],
+        settings: {}
+    };
+}
+
+/**
+ * Save user data object
+ */
+function saveUserData(userId, data) {
+    const key = `focusForgeData_${userId}`;
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+/**
+ * Get user's scheduled tasks
+ */
+function getUserScheduledTasks(userId) {
+    const data = getUserData(userId);
+    return data.scheduledTasks || {};
+}
+
+/**
+ * Save user's scheduled tasks
+ */
+function saveUserScheduledTasks(userId, scheduledTasks) {
+    const data = getUserData(userId);
+    data.scheduledTasks = scheduledTasks;
+    saveUserData(userId, data);
+}
+
+// ==========================================
+// CALENDAR FUNCTIONS
+// ==========================================
+
+// Get data from user-specific storage
+let scheduledTasks = {};
+let allTasks = {};
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -13,9 +103,12 @@ let selectedDate = null;
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// Save to localStorage
+// Save to user-specific localStorage
 function saveScheduledTasks() {
-    localStorage.setItem('focusForgeScheduledTasks', JSON.stringify(scheduledTasks));
+    const userId = getCurrentUserId();
+    if (userId) {
+        saveUserScheduledTasks(userId, scheduledTasks);
+    }
 }
 
 // Format date as YYYY-MM-DD
@@ -208,11 +301,21 @@ const elements = {
     addDateTaskBtn: document.getElementById('addDateTaskBtn'),
     donationModal: document.getElementById('donationModal'),
     donationClose: document.getElementById('donationClose'),
-    sidebarDonation: document.getElementById('sidebarDonation')
+    sidebarDonation: document.getElementById('sidebarDonation'),
+    sidebarLogout: document.getElementById('sidebarLogout')
 };
 
 // Initialize
 function init() {
+    // Check authentication
+    requireAuth();
+    
+    // Load user data
+    const userId = getCurrentUserId();
+    if (userId) {
+        scheduledTasks = getUserScheduledTasks(userId);
+    }
+    
     // Render calendar
     renderCalendar();
     
@@ -250,6 +353,11 @@ function init() {
         elements.sidebarDonation.addEventListener('click', () => {
             elements.donationModal.classList.add('active');
         });
+    }
+    
+    // Logout button
+    if (elements.sidebarLogout) {
+        elements.sidebarLogout.addEventListener('click', logoutUser);
     }
     
     if (elements.donationClose) {

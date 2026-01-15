@@ -1,10 +1,96 @@
 /**
  * Focus Forge - Tasks Page
- * All tasks management
+ * All tasks management with user authentication
  */
 
-// Task storage
-let tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
+// ==========================================
+// AUTHENTICATION FUNCTIONS
+// ==========================================
+
+/**
+ * Get current session
+ */
+function getCurrentSession() {
+    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
+           JSON.parse(sessionStorage.getItem('focusForgeSession'));
+}
+
+/**
+ * Check if user is logged in
+ */
+function isLoggedIn() {
+    return getCurrentSession() !== null;
+}
+
+/**
+ * Get current user ID
+ */
+function getCurrentUserId() {
+    const session = getCurrentSession();
+    return session ? session.userId : null;
+}
+
+/**
+ * Redirect to login if not logged in
+ */
+function requireAuth() {
+    if (!isLoggedIn()) {
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * Logout user
+ */
+function logoutUser() {
+    localStorage.removeItem('focusForgeSession');
+    sessionStorage.removeItem('focusForgeSession');
+    window.location.href = 'login.html';
+}
+
+// ==========================================
+// USER DATA FUNCTIONS
+// ==========================================
+
+/**
+ * Get user data object
+ */
+function getUserData(userId) {
+    const key = `focusForgeData_${userId}`;
+    return JSON.parse(localStorage.getItem(key)) || {
+        tasks: [],
+        sessions: [],
+        settings: {}
+    };
+}
+
+/**
+ * Save user data object
+ */
+function saveUserData(userId, data) {
+    const key = `focusForgeData_${userId}`;
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+/**
+ * Get user's tasks
+ */
+function getUserTasks(userId) {
+    const data = getUserData(userId);
+    return data.tasks || [];
+}
+
+/**
+ * Save user's tasks
+ */
+function saveUserTasks(userId, tasks) {
+    const data = getUserData(userId);
+    data.tasks = tasks;
+    saveUserData(userId, data);
+}
+
+// Task storage - per user
+let tasks = [];
 
 // DOM Elements
 const elements = {
@@ -17,12 +103,16 @@ const elements = {
     filterBtns: document.querySelectorAll('.filter-btn'),
     donationModal: document.getElementById('donationModal'),
     donationClose: document.getElementById('donationClose'),
-    sidebarDonation: document.getElementById('sidebarDonation')
+    sidebarDonation: document.getElementById('sidebarDonation'),
+    sidebarLogout: document.getElementById('sidebarLogout')
 };
 
 // Task Functions
 function saveTasks() {
-    localStorage.setItem('focusForgeTasks', JSON.stringify(tasks));
+    const userId = getCurrentUserId();
+    if (userId) {
+        saveUserTasks(userId, tasks);
+    }
 }
 
 function escapeHtml(text) {
@@ -161,6 +251,11 @@ function initEventListeners() {
         });
     }
     
+    // Logout button
+    if (elements.sidebarLogout) {
+        elements.sidebarLogout.addEventListener('click', logoutUser);
+    }
+    
     if (elements.donationClose) {
         elements.donationClose.addEventListener('click', () => {
             elements.donationModal.classList.remove('active');
@@ -178,6 +273,15 @@ function initEventListeners() {
 
 // Initialize
 function init() {
+    // Check authentication
+    requireAuth();
+    
+    // Load user data
+    const userId = getCurrentUserId();
+    if (userId) {
+        tasks = getUserTasks(userId);
+    }
+    
     initEventListeners();
     renderTasks();
 }
