@@ -41,7 +41,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(-45deg, #1a1a2e, #16213e, #1a1a2e, #0f0f1a);
+    background: linear-gradient(-45deg, #0d0d12, #12121a, #1a1a2e, #0d0d12);
     background-size: 400% 400%;
     animation: gradientShift 20s ease infinite;
 }
@@ -114,6 +114,9 @@ body {
     justify-content: center;
     margin-bottom: 2rem;
     text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    white-space: pre-wrap;
+    word-spacing: 0.3em;
+    line-height: 1.6;
 }
 
 .intro-text .typing-cursor {

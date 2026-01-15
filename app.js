@@ -95,7 +95,7 @@ async function showIntroScreen() {
     // Show overlay
     overlay.classList.add('active');
     
-    // Typing message
+    // Typing message with proper word spacing
     const message = "Lock in. One session at a time.";
     
     // Start typing animation
