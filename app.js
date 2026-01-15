@@ -67,17 +67,74 @@ const AppState = {
             duration: 20 * 60,
             waveType: 'spindle',
             frequency: 12
+        },
+        // Music categories
+        'lofi': {
+            title: 'Lofi Chill',
+            description: 'Relaxing lofi beats for studying and relaxing',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'lofi'
+        },
+        'ambient': {
+            title: 'Ambient Space',
+            description: 'Atmospheric soundscapes for deep relaxation',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'ambient'
+        },
+        'piano': {
+            title: 'Piano Relax',
+            description: 'Gentle piano melodies for peace and focus',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'piano'
+        },
+        'violin': {
+            title: 'Elegant Violin',
+            description: 'Beautiful violin compositions for inspiration',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'violin'
+        },
+        'jazz': {
+            title: 'Smooth Jazz',
+            description: 'Soft jazz sounds for a sophisticated atmosphere',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'jazz'
+        },
+        'cafe': {
+            title: 'Cafe Ambience',
+            description: 'Coffee shop sounds with background music',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'cafe'
+        },
+        'library': {
+            title: 'Library Quiet',
+            description: 'Quiet study atmosphere with soft page turning',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'library'
+        },
+        'nature': {
+            title: 'Nature Sounds',
+            description: 'Peaceful forest and wildlife sounds',
+            duration: 60 * 60,
+            waveType: 'music',
+            musicType: 'nature'
         }
     },
     
     // Background sounds
     backgroundSounds: {
-        'rain': { active: false, gain: 0 },
-        'ocean': { active: false, gain: 0 },
-        'forest': { active: false, gain: 0 },
-        'wind': { active: false, gain: 0 },
-        'white-noise': { active: false, gain: 0 },
-        'fireplace': { active: false, gain: 0 }
+        'rain': { active: false, gain: 0.15 },
+        'ocean': { active: false, gain: 0.12 },
+        'forest': { active: false, gain: 0.1 },
+        'wind': { active: false, gain: 0.08 },
+        'white-noise': { active: false, gain: 0.06 },
+        'fireplace': { active: false, gain: 0.1 }
     }
 };
 
@@ -147,6 +204,7 @@ class AudioSystem {
         this.noiseNodes = [];
         this.gainNodes = [];
         this.isPlaying = false;
+        this.noiseNodesByType = {}; // Track noise nodes by sound type
     }
     
     async init() {
@@ -211,6 +269,11 @@ class AudioSystem {
     }
     
     startNoise(type = 'white', gainValue = 0.05) {
+        // Stop existing noise of this type first
+        if (this.noiseNodesByType[type]) {
+            this.stopNoise(type);
+        }
+        
         const noise = this.context.createBufferSource();
         const bufferSize = 2 * this.context.sampleRate;
         const buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
@@ -274,9 +337,34 @@ class AudioSystem {
         
         noise.start();
         
+        // Track by type
+        this.noiseNodesByType[type] = { noise, gainNode, filter };
         this.noiseNodes.push({ noise, gainNode, filter });
         
         return { noise, gainNode, filter };
+    }
+    
+    stopNoise(type) {
+        const node = this.noiseNodesByType[type];
+        if (!node) return;
+        
+        const { noise, gainNode, filter } = node;
+        const now = this.context.currentTime;
+        
+        // Fade out
+        gainNode.gain.cancelScheduledValues(now);
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+        
+        setTimeout(() => {
+            try {
+                noise.stop();
+            } catch (e) {}
+        }, 600);
+        
+        // Remove from tracking
+        delete this.noiseNodesByType[type];
+        this.noiseNodes = this.noiseNodes.filter(n => n.noise !== noise);
     }
     
     stopAll() {
@@ -294,20 +382,15 @@ class AudioSystem {
             }, AppState.fadeDuration * 1000);
         });
         
-        this.noiseNodes.forEach(({ noise, gainNode }) => {
-            gainNode.gain.cancelScheduledValues(now);
-            gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + AppState.fadeDuration);
-            setTimeout(() => {
-                try {
-                    noise.stop();
-                } catch (e) {}
-            }, AppState.fadeDuration * 1000);
+        // Stop noise nodes by type
+        Object.keys(this.noiseNodesByType).forEach(type => {
+            this.stopNoise(type);
         });
         
         this.oscillators = [];
         this.noiseNodes = [];
         this.gainNodes = [];
+        this.noiseNodesByType = {};
     }
     
     setVolume(value) {
@@ -756,36 +839,42 @@ async function playAudio() {
     const track = AppState.tracks[AppState.currentCategory];
     
     // Start audio based on category
-    switch (AppState.currentCategory) {
-        case 'focus':
-            // Gamma waves at 40Hz
-            audioSystem.startBinauralBeat(200, 40, 0.08);
-            audioSystem.startOscillator(100, 'sine', 0.05);
-            break;
-            
-        case 'relax':
-            // Alpha waves at 7-8Hz
-            audioSystem.startBinauralBeat(200, 8, 0.1);
-            audioSystem.startOscillator(150, 'sine', 0.05);
-            break;
-            
-        case 'sleep':
-            // Delta waves at 1-4Hz
-            audioSystem.startBinauralBeat(150, 2, 0.12);
-            audioSystem.startOscillator(80, 'sine', 0.05);
-            break;
-            
-        case 'meditate':
-            // Theta waves at 6Hz
-            audioSystem.startBinauralBeat(180, 6, 0.1);
-            audioSystem.startOscillator(100, 'sine', 0.05);
-            break;
-            
-        case 'power-nap':
-            // Sleep spindles
-            audioSystem.startBinauralBeat(160, 12, 0.1);
-            audioSystem.startOscillator(90, 'sine', 0.05);
-            break;
+    // Handle music types differently
+    if (track.waveType === 'music') {
+        playMusic(track.musicType);
+    } else {
+        // Original brainwave categories
+        switch (AppState.currentCategory) {
+            case 'focus':
+                // Gamma waves at 40Hz
+                audioSystem.startBinauralBeat(200, 40, 0.08);
+                audioSystem.startOscillator(100, 'sine', 0.05);
+                break;
+                
+            case 'relax':
+                // Alpha waves at 7-8Hz
+                audioSystem.startBinauralBeat(200, 8, 0.1);
+                audioSystem.startOscillator(150, 'sine', 0.05);
+                break;
+                
+            case 'sleep':
+                // Delta waves at 1-4Hz
+                audioSystem.startBinauralBeat(150, 2, 0.12);
+                audioSystem.startOscillator(80, 'sine', 0.05);
+                break;
+                
+            case 'meditate':
+                // Theta waves at 6Hz
+                audioSystem.startBinauralBeat(180, 6, 0.1);
+                audioSystem.startOscillator(100, 'sine', 0.05);
+                break;
+                
+            case 'power-nap':
+                // Sleep spindles
+                audioSystem.startBinauralBeat(160, 12, 0.1);
+                audioSystem.startOscillator(90, 'sine', 0.05);
+                break;
+        }
     }
     
     // Start background sounds that are active
@@ -805,6 +894,68 @@ async function playAudio() {
     }
 }
 
+function playMusic(musicType) {
+    switch (musicType) {
+        case 'lofi':
+            // Lofi - gentle filtered noise with soft beat feel
+            audioSystem.startOscillator(80, 'sine', 0.03);
+            audioSystem.startOscillator(120, 'sine', 0.02);
+            audioSystem.startNoise('pink', 0.04);
+            break;
+            
+        case 'ambient':
+            // Ambient - atmospheric pads
+            audioSystem.startOscillator(150, 'sine', 0.04);
+            audioSystem.startOscillator(155, 'sine', 0.04);
+            audioSystem.startOscillator(160, 'sine', 0.03);
+            audioSystem.startNoise('pink', 0.02);
+            break;
+            
+        case 'piano':
+            // Piano - gentle melodic tones
+            audioSystem.startOscillator(261.63, 'sine', 0.05); // C4
+            audioSystem.startOscillator(329.63, 'sine', 0.04); // E4
+            audioSystem.startOscillator(392, 'sine', 0.03); // G4
+            audioSystem.startNoise('brown', 0.02);
+            break;
+            
+        case 'violin':
+            // Violin - warm string tones
+            audioSystem.startOscillator(196, 'sawtooth', 0.03); // G3
+            audioSystem.startOscillator(293.66, 'sine', 0.03); // D4
+            audioSystem.startOscillator(392, 'sine', 0.025); // G4
+            audioSystem.startNoise('pink', 0.03);
+            break;
+            
+        case 'jazz':
+            // Jazz - smooth chord tones
+            audioSystem.startOscillator(220, 'sine', 0.03); // A3
+            audioSystem.startOscillator(277.18, 'sine', 0.03); // C#4
+            audioSystem.startOscillator(329.63, 'sine', 0.025); // E4
+            audioSystem.startNoise('brown', 0.02);
+            break;
+            
+        case 'cafe':
+            // Cafe - ambient noise with occasional sounds
+            audioSystem.startNoise('pink', 0.05);
+            audioSystem.startOscillator(200, 'sine', 0.02);
+            break;
+            
+        case 'library':
+            // Library - very quiet with subtle ambient
+            audioSystem.startNoise('brown', 0.02);
+            audioSystem.startOscillator(440, 'sine', 0.01);
+            break;
+            
+        case 'nature':
+            // Nature - forest ambience
+            audioSystem.startNoise('pink', 0.06);
+            audioSystem.startOscillator(300, 'sine', 0.015);
+            audioSystem.startOscillator(500, 'sine', 0.01);
+            break;
+    }
+}
+
 function toggleBackgroundSound(soundType) {
     const sound = AppState.backgroundSounds[soundType];
     sound.active = !sound.active;
@@ -816,6 +967,8 @@ function toggleBackgroundSound(soundType) {
     if (AppState.isPlaying) {
         if (sound.active) {
             audioSystem.startNoise(soundType, sound.gain);
+        } else {
+            audioSystem.stopNoise(soundType);
         }
     }
 }
@@ -861,12 +1014,30 @@ function initEventListeners() {
     
     // Previous/Next buttons
     DOM.prevBtn.addEventListener('click', () => {
-        const categories = Object.keys(AppState.tracks);
-        const currentIndex = categories.indexOf(AppState.currentCategory);
-        const prevIndex = (currentIndex - 1 + categories.length) % categories.length;
+        const allCategories = Object.keys(AppState.tracks);
+        const currentIndex = allCategories.indexOf(AppState.currentCategory);
+        const prevIndex = (currentIndex - 1 + allCategories.length) % allCategories.length;
         
-        AppState.currentCategory = categories[prevIndex];
-        updateCategoryUI();
+        AppState.currentCategory = allCategories[prevIndex];
+        
+        // Update UI based on category type
+        const isMusic = AppState.tracks[AppState.currentCategory].waveType === 'music';
+        
+        if (isMusic) {
+            DOM.navBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.music-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.music-card[data-music="${AppState.currentCategory}"]`)?.classList.add('active');
+        } else {
+            DOM.navBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === AppState.currentCategory);
+            });
+            document.querySelectorAll('.music-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.category-card[data-category="${AppState.currentCategory}"]`)?.classList.add('active');
+        }
+        
+        updateTrackInfo();
         
         if (AppState.isPlaying) {
             audioSystem.stopAll();
@@ -875,12 +1046,30 @@ function initEventListeners() {
     });
     
     DOM.nextBtn.addEventListener('click', () => {
-        const categories = Object.keys(AppState.tracks);
-        const currentIndex = categories.indexOf(AppState.currentCategory);
-        const nextIndex = (currentIndex + 1) % categories.length;
+        const allCategories = Object.keys(AppState.tracks);
+        const currentIndex = allCategories.indexOf(AppState.currentCategory);
+        const nextIndex = (currentIndex + 1) % allCategories.length;
         
-        AppState.currentCategory = categories[nextIndex];
-        updateCategoryUI();
+        AppState.currentCategory = allCategories[nextIndex];
+        
+        // Update UI based on category type
+        const isMusic = AppState.tracks[AppState.currentCategory].waveType === 'music';
+        
+        if (isMusic) {
+            DOM.navBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.music-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.music-card[data-music="${AppState.currentCategory}"]`)?.classList.add('active');
+        } else {
+            DOM.navBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === AppState.currentCategory);
+            });
+            document.querySelectorAll('.music-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.category-card[data-category="${AppState.currentCategory}"]`)?.classList.add('active');
+        }
+        
+        updateTrackInfo();
         
         if (AppState.isPlaying) {
             audioSystem.stopAll();
@@ -950,6 +1139,33 @@ function initEventListeners() {
     DOM.soundCards.forEach(card => {
         card.addEventListener('click', () => {
             toggleBackgroundSound(card.dataset.sound);
+        });
+    });
+    
+    // Music category cards
+    const musicCards = document.querySelectorAll('.music-card');
+    musicCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const musicType = card.dataset.music;
+            
+            // Update UI
+            musicCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            
+            AppState.currentCategory = musicType;
+            
+            // Update nav
+            DOM.navBtns.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            updateTrackInfo();
+            
+            // If playing, restart with new category
+            if (AppState.isPlaying) {
+                audioSystem.stopAll();
+                playAudio();
+            }
         });
     });
     

@@ -12,13 +12,16 @@
     <div class="app-container">
         <!-- Header -->
         <header class="header">
-            <div class="logo">
-                <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="2"/>
-                    <path d="M20 8C20 8 12 16 12 24C12 28.4183 15.5817 32 20 32C24.4183 32 28 28.4183 28 24C28 16 20 8 20 8Z" fill="currentColor"/>
-                    <circle cx="20" cy="24" r="3" fill="white"/>
-                </svg>
-                <span class="logo-text">MindFlow</span>
+            <div class="logo-container">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="2"/>
+                        <path d="M20 8C20 8 12 16 12 24C12 28.4183 15.5817 32 20 32C24.4183 32 28 28.4183 28 24C28 16 20 8 20 8Z" fill="currentColor"/>
+                        <circle cx="20" cy="24" r="3" fill="white"/>
+                    </svg>
+                    <span class="logo-text">MindFlow</span>
+                </div>
+                <span class="header-tagline">Focus, Relax & Sleep</span>
             </div>
             <nav class="nav">
                 <button class="nav-btn active" data-category="focus">Focus</button>
@@ -284,7 +287,88 @@
                             <path d="M24 40c-8 0-12-8-12-16 0 8 4 16 12 16zM24 40c8 0 12-8 12-16 0 8-4 16-12 16z" stroke="currentColor" stroke-width="2"/>
                             <rect x="20" y="28" width="8" height="12" stroke="currentColor" stroke-width="2"/>
                         </svg>
-                        <span>Fireplace</span>
+                    <span>Fireplace</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Music Categories -->
+            <section class="music-categories">
+                <h3 class="section-title">Music & Ambient</h3>
+                <div class="music-grid">
+                    <div class="music-card" data-music="lofi">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+                            <path d="M18 20h12M18 24h12M18 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="32" cy="28" r="4" fill="currentColor"/>
+                        </svg>
+                        <span>Lofi</span>
+                        <span class="music-desc">Chill beats</span>
+                    </div>
+                    <div class="music-card" data-music="ambient">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="24" cy="24" r="3" fill="currentColor"/>
+                        </svg>
+                        <span>Ambient</span>
+                        <span class="music-desc">Atmospheric</span>
+                    </div>
+                    <div class="music-card" data-music="piano">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <rect x="8" y="12" width="6" height="28" stroke="currentColor" stroke-width="2"/>
+                            <rect x="16" y="8" width="6" height="32" stroke="currentColor" stroke-width="2"/>
+                            <rect x="24" y="12" width="6" height="28" stroke="currentColor" stroke-width="2"/>
+                            <rect x="32" y="8" width="6" height="32" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Piano</span>
+                        <span class="music-desc">Relaxing keys</span>
+                    </div>
+                    <div class="music-card" data-music="violin">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <path d="M16 40c0-16 8-24 16-24s16 8 16 24" stroke="currentColor" stroke-width="2"/>
+                            <line x1="16" y1="40" x2="32" y2="40" stroke="currentColor" stroke-width="2"/>
+                            <path d="M24 16v24" stroke="currentColor" stroke-width="1"/>
+                        </svg>
+                        <span>Violin</span>
+                        <span class="music-desc">Elegant strings</span>
+                    </div>
+                    <div class="music-card" data-music="jazz">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="20" cy="24" r="12" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="32" cy="20" r="8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M14 32c4 4 10 4 14 0" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Jazz</span>
+                        <span class="music-desc">Smooth jazz</span>
+                    </div>
+                    <div class="music-card" data-music="cafe">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <ellipse cx="24" cy="36" rx="16" ry="8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 36v-4c0-6 4-10 12-10s12 4 12 10v4" stroke="currentColor" stroke-width="2"/>
+                            <path d="M32 24c4 0 6-4 6-8s-2-8-6-8" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Cafe</span>
+                        <span class="music-desc">Coffee shop</span>
+                    </div>
+                    <div class="music-card" data-music="library">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <rect x="8" y="8" width="32" height="36" stroke="currentColor" stroke-width="2"/>
+                            <line x1="14" y1="16" x2="34" y2="16" stroke="currentColor" stroke-width="2"/>
+                            <line x1="14" y1="24" x2="34" y2="24" stroke="currentColor" stroke-width="2"/>
+                            <line x1="14" y1="32" x2="34" y2="32" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="24" cy="20" r="2" fill="currentColor"/>
+                        </svg>
+                        <span>Library</span>
+                        <span class="music-desc">Quiet study</span>
+                    </div>
+                    <div class="music-card" data-music="nature">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <path d="M24 8l-6 12h12l-6-12zM24 20l-4 8h8l-4-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M8 40h32M16 32h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Nature</span>
+                        <span class="music-desc">Forest sounds</span>
                     </div>
                 </div>
             </section>
