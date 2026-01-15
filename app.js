@@ -17,6 +17,145 @@ const state = {
     soundEnabled: JSON.parse(localStorage.getItem('focusForgeSound')) !== false
 };
 
+// ==========================================
+// INTRO SCREEN FUNCTIONS
+// ==========================================
+
+/**
+ * Check if this is the first visit today
+ * @returns {boolean} true if user hasn't visited today
+ */
+function isFirstVisitToday() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastVisit = localStorage.getItem('focusForgeLastVisit');
+    return lastVisit !== today;
+}
+
+/**
+ * Get today's date string
+ * @returns {string} ISO date string (YYYY-MM-DD)
+ */
+function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
+}
+
+/**
+ * Store today's date as the last visit date
+ */
+function storeLastVisitDate() {
+    localStorage.setItem('focusForgeLastVisit', getTodayDate());
+}
+
+/**
+ * Type text character by character with cursor
+ * @param {string} text - Text to type
+ * @param {HTMLElement} element - Element to display text
+ * @param {number} duration - Total duration in ms
+ * @returns {Promise} Resolves when typing is complete
+ */
+function typeText(text, element, duration = 1800) {
+    return new Promise((resolve) => {
+        const charCount = text.length;
+        const charsPerMs = charCount / duration;
+        let currentIndex = 0;
+        
+        // Add cursor
+        element.innerHTML = '<span class="typing-cursor"></span>';
+        const cursor = element.querySelector('.typing-cursor');
+        
+        const typeChar = () => {
+            if (currentIndex < charCount) {
+                const span = document.createElement('span');
+                span.textContent = text[currentIndex];
+                cursor.before(span);
+                currentIndex++;
+                setTimeout(typeChar, duration / charCount);
+            } else {
+                resolve();
+            }
+        };
+        
+        typeChar();
+    });
+}
+
+/**
+ * Show the intro screen with typing animation
+ */
+async function showIntroScreen() {
+    const overlay = document.getElementById('introOverlay');
+    const textElement = document.getElementById('introText');
+    const btnElement = document.getElementById('introBtn');
+    
+    if (!overlay || !textElement || !btnElement) {
+        console.error('Intro screen elements not found');
+        return;
+    }
+    
+    // Show overlay
+    overlay.classList.add('active');
+    
+    // Typing message
+    const message = "Lock in. One session at a time.";
+    
+    // Start typing animation
+    await typeText(message, textElement, 1800);
+    
+    // Small pause after typing
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Fade in button
+    btnElement.classList.add('visible');
+}
+
+/**
+ * Hide the intro screen and store visit date
+ */
+function hideIntroScreen() {
+    const overlay = document.getElementById('introOverlay');
+    const btnElement = document.getElementById('introBtn');
+    
+    if (overlay) {
+        // Fade out button first
+        if (btnElement) {
+            btnElement.classList.remove('visible');
+        }
+        
+        // Fade out overlay
+        overlay.classList.remove('active');
+        
+        // Remove overlay from DOM after animation
+        setTimeout(() => {
+            overlay.remove();
+        }, 400);
+    }
+    
+    // Store today's date
+    storeLastVisitDate();
+}
+
+/**
+ * Initialize intro screen logic
+ */
+async function initIntroScreen() {
+    if (isFirstVisitToday()) {
+        // Show intro screen
+        await showIntroScreen();
+        
+        // Add click handler for the button
+        const btnElement = document.getElementById('introBtn');
+        if (btnElement) {
+            btnElement.addEventListener('click', hideIntroScreen);
+        }
+    } else {
+        // Already visited today, remove overlay from DOM if it exists
+        const overlay = document.getElementById('introOverlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+}
+
 // DOM Elements
 const elements = {
     timerMinutes: document.getElementById('timerMinutes'),
@@ -416,7 +555,10 @@ function initEventListeners() {
 }
 
 // Initialize
-function init() {
+async function init() {
+    // Initialize intro screen first (waits for completion if first visit today)
+    await initIntroScreen();
+    
     initEventListeners();
     updateTimerDisplay();
     updateTimerRing();
