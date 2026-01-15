@@ -44,7 +44,8 @@ const elements = {
     setTimer: document.getElementById('setTimer'),
     donationBtn: document.getElementById('donationBtn'),
     donationModal: document.getElementById('donationModal'),
-    donationClose: document.getElementById('donationClose')
+    donationClose: document.getElementById('donationClose'),
+    sidebarDonation: document.getElementById('sidebarDonation')
 };
 
 // Timer Functions
@@ -373,22 +374,29 @@ function initEventListeners() {
         }
     });
     
-    // Donation modal
+// Donation modal
     if (elements.donationBtn) {
         elements.donationBtn.addEventListener('click', () => {
             elements.donationModal.classList.add('active');
         });
-        
-        elements.donationClose.addEventListener('click', () => {
-            elements.donationModal.classList.remove('active');
-        });
-        
-        elements.donationModal.addEventListener('click', (e) => {
-            if (e.target === elements.donationModal) {
-                elements.donationModal.classList.remove('active');
-            }
+    }
+    
+    // Sidebar donation trigger
+    if (elements.sidebarDonation) {
+        elements.sidebarDonation.addEventListener('click', () => {
+            elements.donationModal.classList.add('active');
         });
     }
+    
+    elements.donationClose.addEventListener('click', () => {
+        elements.donationModal.classList.remove('active');
+    });
+    
+    elements.donationModal.addEventListener('click', (e) => {
+        if (e.target === elements.donationModal) {
+            elements.donationModal.classList.remove('active');
+        }
+    });
 }
 
 // Initialize
