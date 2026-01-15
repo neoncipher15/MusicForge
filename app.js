@@ -222,6 +222,430 @@ function updateTaskStats() {
 }
 
 // ==========================================
+// AUDIO CATEGORIES SYSTEM
+// ==========================================
+
+// Audio categories configuration
+const AUDIO_CATEGORIES = {
+    focus: {
+        name: 'Focus',
+        description: 'Enhance concentration and mental clarity',
+        waveType: 'Gamma Waves - 40Hz',
+        baseFreq: 200,
+        beatFreq: 40,
+        color: '#667eea',
+        hasNoise: false
+    },
+    relax: {
+        name: 'Relax',
+        description: 'Reduce stress and promote calm',
+        waveType: 'Alpha Waves - 7Hz',
+        baseFreq: 180,
+        beatFreq: 7,
+        color: '#43e97b',
+        hasNoise: false
+    },
+    sleep: {
+        name: 'Sleep',
+        description: 'Deep sleep and restoration',
+        waveType: 'Delta Waves - 2Hz',
+        baseFreq: 160,
+        beatFreq: 2,
+        color: '#1a1a2e',
+        hasNoise: true,
+        noiseType: 'pink'
+    },
+    meditate: {
+        name: 'Meditate',
+        description: 'Deep meditation and mindfulness',
+        waveType: 'Theta Waves - 6Hz',
+        baseFreq: 170,
+        beatFreq: 6,
+        color: '#f77f00',
+        hasNoise: false
+    },
+    'power-nap': {
+        name: 'Power Nap',
+        description: 'Quick rest and rejuvenation',
+        waveType: 'Theta/Delta - 4Hz',
+        baseFreq: 165,
+        beatFreq: 4,
+        color: '#e1306c',
+        hasNoise: true,
+        noiseType: 'brown'
+    }
+};
+
+// Audio state
+const audioState = {
+    context: null,
+    masterGain: null,
+    analyser: null,
+    isPlaying: false,
+    currentCategory: 'focus',
+    volume: 0.5,
+    oscillators: [],
+    noiseNode: null,
+    noiseGain: null,
+    leftPanner: null,
+    rightPanner: null
+};
+
+// Initialize audio context
+function initAudio() {
+    if (audioState.context) return;
+    
+    try {
+        audioState.context = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Create master gain node
+        audioState.masterGain = audioState.context.createGain();
+        audioState.masterGain.connect(audioState.context.destination);
+        
+        // Create analyser for visualizer
+        audioState.analyser = audioState.context.createAnalyser();
+        audioState.analyser.fftSize = 2048;
+        audioState.masterGain.connect(audioState.analyser);
+        
+        // Load saved preferences
+        const savedCategory = localStorage.getItem('focusForgeAudioCategory');
+        const savedVolume = localStorage.getItem('focusForgeAudioVolume');
+        
+        if (savedCategory && AUDIO_CATEGORIES[savedCategory]) {
+            audioState.currentCategory = savedCategory;
+        }
+        
+        if (savedVolume !== null) {
+            audioState.volume = parseFloat(savedVolume);
+        }
+        
+        // Update UI
+        updateCategorySelection();
+        updateVolumeUI();
+        
+    } catch (error) {
+        console.error('Failed to initialize audio:', error);
+    }
+}
+
+// Create binaural beat oscillators
+function createBinauralBeat(category) {
+    const config = AUDIO_CATEGORIES[category];
+    const ctx = audioState.context;
+    
+    // Create left oscillator (base frequency)
+    const leftOsc = ctx.createOscillator();
+    leftOsc.type = 'sine';
+    leftOsc.frequency.setValueAtTime(config.baseFreq, ctx.currentTime);
+    
+    // Create right oscillator (base + beat frequency for binaural effect)
+    const rightOsc = ctx.createOscillator();
+    rightOsc.type = 'sine';
+    rightOsc.frequency.setValueAtTime(config.baseFreq + config.beatFreq, ctx.currentTime);
+    
+    // Create stereo panners
+    const leftPanner = ctx.createStereoPanner();
+    leftPanner.pan.setValueAtTime(-1, ctx.currentTime); // Full left
+    
+    const rightPanner = ctx.createStereoPanner();
+    rightPanner.pan.setValueAtTime(1, ctx.currentTime); // Full right
+    
+    // Create gain nodes for fade control
+    const leftGain = ctx.createGain();
+    const rightGain = ctx.createGain();
+    
+    // Initial gain (will be faded in)
+    leftGain.gain.setValueAtTime(0, ctx.currentTime);
+    rightGain.gain.setValueAtTime(0, ctx.currentTime);
+    
+    // Connect nodes
+    leftOsc.connect(leftGain);
+    leftGain.connect(leftPanner);
+    leftPanner.connect(audioState.masterGain);
+    
+    rightOsc.connect(rightGain);
+    rightGain.connect(rightPanner);
+    rightPanner.connect(audioState.masterGain);
+    
+    // Start oscillators
+    leftOsc.start();
+    rightOsc.start();
+    
+    // Store references
+    audioState.oscillators = [leftOsc, rightOsc];
+    audioState.leftGain = leftGain;
+    audioState.rightGain = rightGain;
+    audioState.leftPanner = leftPanner;
+    audioState.rightPanner = rightPanner;
+    
+    // Fade in
+    fadeInAudio();
+}
+
+// Create noise layer for sleep/power nap
+function createNoiseLayer(noiseType) {
+    const ctx = audioState.context;
+    const bufferSize = 2 * ctx.sampleRate;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    
+    if (noiseType === 'pink') {
+        // Pink noise approximation
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+            output[i] *= 0.11;
+            b6 = white * 0.115926;
+        }
+    } else {
+        // Brown noise
+        let lastOut = 0;
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            output[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = output[i];
+            output[i] *= 3.5;
+        }
+    }
+    
+    const noiseNode = ctx.createBufferSource();
+    noiseNode.buffer = noiseBuffer;
+    noiseNode.loop = true;
+    
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, ctx.currentTime);
+    
+    noiseNode.connect(noiseGain);
+    noiseGain.connect(audioState.masterGain);
+    
+    noiseNode.start();
+    
+    audioState.noiseNode = noiseNode;
+    audioState.noiseGain = noiseGain;
+}
+
+// Start audio playback
+function playAudio() {
+    if (!audioState.context) {
+        initAudio();
+    }
+    
+    if (audioState.context.state === 'suspended') {
+        audioState.context.resume();
+    }
+    
+    // Stop any existing audio
+    stopAudio();
+    
+    const category = audioState.currentCategory;
+    const config = AUDIO_CATEGORIES[category];
+    
+    // Create binaural beats
+    createBinauralBeat(category);
+    
+    // Add noise if needed
+    if (config.hasNoise) {
+        createNoiseLayer(config.noiseType || 'pink');
+        // Fade in noise after a short delay
+        setTimeout(() => {
+            if (audioState.noiseGain) {
+                audioState.noiseGain.gain.linearRampToValueAtTime(0.15, audioState.context.currentTime + 2);
+            }
+        }, 1000);
+    }
+    
+    audioState.isPlaying = true;
+    updateAudioPlayButton();
+    
+    // Start visualizer
+    startVisualizer();
+}
+
+// Stop audio playback
+function stopAudio() {
+    if (!audioState.context) return;
+    
+    // Fade out
+    fadeOutAudio();
+    
+    // Stop visualizer
+    stopVisualizer();
+    
+    // Stop oscillators after fade
+    setTimeout(() => {
+        audioState.oscillators.forEach(osc => {
+            try {
+                osc.stop();
+                osc.disconnect();
+            } catch (e) {}
+        });
+        audioState.oscillators = [];
+        
+        if (audioState.noiseNode) {
+            try {
+                audioState.noiseNode.stop();
+                audioState.noiseNode.disconnect();
+            } catch (e) {}
+            audioState.noiseNode = null;
+            audioState.noiseGain = null;
+        }
+    }, 2500);
+    
+    audioState.isPlaying = false;
+    updateAudioPlayButton();
+}
+
+// Fade in audio
+function fadeInAudio() {
+    const ctx = audioState.context;
+    const now = ctx.currentTime;
+    const duration = 2;
+    
+    if (audioState.leftGain) {
+        audioState.leftGain.gain.linearRampToValueAtTime(0.3, now + duration);
+        audioState.rightGain.gain.linearRampToValueAtTime(0.3, now + duration);
+    }
+}
+
+// Fade out audio
+function fadeOutAudio() {
+    const ctx = audioState.context;
+    const now = ctx.currentTime;
+    const duration = 2;
+    
+    if (audioState.leftGain) {
+        audioState.leftGain.gain.linearRampToValueAtTime(0, now + duration);
+        audioState.rightGain.gain.linearRampToValueAtTime(0, now + duration);
+    }
+    
+    if (audioState.noiseGain) {
+        audioState.noiseGain.gain.linearRampToValueAtTime(0, now + duration);
+    }
+}
+
+// Toggle audio playback
+function toggleAudio() {
+    if (audioState.isPlaying) {
+        stopAudio();
+    } else {
+        playAudio();
+    }
+}
+
+// Set audio volume
+function setAudioVolume(value) {
+    audioState.volume = value;
+    
+    if (audioState.masterGain) {
+        audioState.masterGain.gain.setValueAtTime(value, audioState.context.currentTime);
+    }
+    
+    // Save preference
+    localStorage.setItem('focusForgeAudioVolume', value.toString());
+    
+    updateVolumeUI();
+}
+
+// Select audio category
+function selectCategory(category) {
+    if (!AUDIO_CATEGORIES[category]) return;
+    
+    audioState.currentCategory = category;
+    
+    // Save preference
+    localStorage.setItem('focusForgeAudioCategory', category);
+    
+    // Update UI
+    updateCategorySelection();
+    updateCategoryInfo();
+    
+    // If playing, restart with new category
+    if (audioState.isPlaying) {
+        playAudio();
+    }
+}
+
+// Update category selection UI
+function updateCategorySelection() {
+    document.querySelectorAll('.category-card').forEach(card => {
+        card.classList.remove('active');
+        if (card.dataset.category === audioState.currentCategory) {
+            card.classList.add('active');
+        }
+    });
+}
+
+// Update category info display
+function updateCategoryInfo() {
+    const config = AUDIO_CATEGORIES[audioState.currentCategory];
+    const titleEl = document.getElementById('categoryTitle');
+    const descEl = document.getElementById('categoryDesc');
+    const waveEl = document.getElementById('waveType');
+    
+    if (titleEl) titleEl.textContent = config.name;
+    if (descEl) descEl.textContent = config.description;
+    if (waveEl) waveEl.textContent = config.waveType;
+}
+
+// Update audio play button
+function updateAudioPlayButton() {
+    const btn = document.getElementById('audioPlayBtn');
+    const playIcon = btn?.querySelector('.audio-play-icon');
+    const pauseIcon = btn?.querySelector('.audio-pause-icon');
+    
+    if (btn && playIcon && pauseIcon) {
+        if (audioState.isPlaying) {
+            btn.classList.add('playing');
+        } else {
+            btn.classList.remove('playing');
+        }
+    }
+}
+
+// Update volume UI
+function updateVolumeUI() {
+    const slider = document.getElementById('volumeSlider');
+    const btn = document.getElementById('volumeBtn');
+    
+    if (slider) {
+        slider.value = audioState.volume * 100;
+    }
+    
+    if (btn) {
+        if (audioState.volume === 0) {
+            btn.classList.add('muted');
+        } else {
+            btn.classList.remove('muted');
+        }
+    }
+}
+
+// Toggle mute
+function toggleMute() {
+    if (audioState.volume > 0) {
+        audioState.previousVolume = audioState.volume;
+        setAudioVolume(0);
+    } else {
+        setAudioVolume(audioState.previousVolume || 0.5);
+    }
+}
+
+// ==========================================
+// AUDIO VISUALIZER
+// ==========================================
+
+let visualizerAnimationId = null;
+let visualizerCanvas = null;
+let visualizerCtx = null;
+
+// ==========================================
 // TIMER STATE
 // ==========================================
 
@@ -232,6 +656,132 @@ const state = {
     isTimerRunning: false,
     soundEnabled: JSON.parse(localStorage.getItem('focusForgeSound')) !== false
 };
+
+function initVisualizer() {
+    visualizerCanvas = document.getElementById('audioVisualizer');
+    if (!visualizerCanvas) return;
+    
+    visualizerCtx = visualizerCanvas.getContext('2d');
+    resizeVisualizer();
+    
+    window.addEventListener('resize', resizeVisualizer);
+}
+
+function resizeVisualizer() {
+    if (!visualizerCanvas) return;
+    
+    const container = visualizerCanvas.parentElement;
+    visualizerCanvas.width = container.offsetWidth || 800;
+    visualizerCanvas.height = container.offsetHeight || 400;
+}
+
+function startVisualizer() {
+    if (!audioState.analyser || visualizerAnimationId) return;
+    
+    drawVisualizer();
+}
+
+function stopVisualizer() {
+    if (visualizerAnimationId) {
+        cancelAnimationFrame(visualizerAnimationId);
+        visualizerAnimationId = null;
+    }
+    
+    // Clear canvas
+    if (visualizerCtx && visualizerCanvas) {
+        visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+    }
+}
+
+function drawVisualizer() {
+    if (!visualizerCtx || !visualizerCanvas || !audioState.analyser) return;
+    
+    const width = visualizerCanvas.width;
+    const height = visualizerCanvas.height;
+    
+    // Get audio data
+    const bufferLength = audioState.analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    if (audioState.isPlaying) {
+        audioState.analyser.getByteTimeDomainData(dataArray);
+    } else {
+        // Generate idle waveform
+        for (let i = 0; i < bufferLength; i++) {
+            dataArray[i] = 128 + Math.sin(i * 0.01) * 10;
+        }
+    }
+    
+    // Clear canvas
+    visualizerCtx.clearRect(0, 0, width, height);
+    
+    // Get category color
+    const config = AUDIO_CATEGORIES[audioState.currentCategory];
+    const baseColor = config ? config.color : '#667eea';
+    
+    // Draw waveform
+    visualizerCtx.lineWidth = 2;
+    visualizerCtx.strokeStyle = baseColor;
+    visualizerCtx.beginPath();
+    
+    const sliceWidth = width / bufferLength;
+    let x = 0;
+    
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * height) / 2;
+        
+        if (i === 0) {
+            visualizerCtx.moveTo(x, y);
+        } else {
+            visualizerCtx.lineTo(x, y);
+        }
+        
+        x += sliceWidth;
+    }
+    
+    visualizerCtx.lineTo(width, height / 2);
+    visualizerCtx.stroke();
+    
+    // Draw glow effect
+    visualizerCtx.shadowBlur = 10;
+    visualizerCtx.shadowColor = baseColor;
+    visualizerCtx.stroke();
+    visualizerCtx.shadowBlur = 0;
+    
+    // Continue animation
+    visualizerAnimationId = requestAnimationFrame(drawVisualizer);
+}
+
+// Initialize audio event listeners
+function initAudioEventListeners() {
+    // Category card clicks
+    document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', () => {
+            selectCategory(card.dataset.category);
+        });
+    });
+    
+    // Audio play button
+    const audioPlayBtn = document.getElementById('audioPlayBtn');
+    if (audioPlayBtn) {
+        audioPlayBtn.addEventListener('click', toggleAudio);
+    }
+    
+    // Volume slider
+    const volumeSlider = document.getElementById('volumeSlider');
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => {
+            setAudioVolume(e.target.value / 100);
+        });
+    }
+    
+    // Volume button (mute toggle)
+    const volumeBtn = document.getElementById('volumeBtn');
+    if (volumeBtn) {
+        volumeBtn.addEventListener('click', toggleMute);
+    }
+}
 
 // ==========================================
 // DOM ELEMENTS
@@ -618,6 +1168,14 @@ function initEventListeners() {
 async function init() {
     // Initialize intro screen first
     await initIntroScreen();
+    
+    // Initialize audio system
+    initAudio();
+    initAudioEventListeners();
+    updateCategoryInfo();
+    
+    // Initialize visualizer
+    initVisualizer();
     
     // Initialize timer display
     updateTimerDisplay();

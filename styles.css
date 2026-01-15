@@ -1234,6 +1234,282 @@ body {
     display: block;
 }
 
+/* ==========================================
+   AUDIO CATEGORY SELECTOR STYLES
+   ========================================== */
+
+.audio-category-selector {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    max-width: 900px;
+}
+
+.category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.category-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.category-card.active {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Category-specific active colors */
+.category-card[data-category="focus"].active {
+    border-color: #667eea;
+    box-shadow: 0 0 25px rgba(102, 126, 234, 0.4);
+}
+
+.category-card[data-category="relax"].active {
+    border-color: #43e97b;
+    box-shadow: 0 0 25px rgba(67, 233, 123, 0.4);
+}
+
+.category-card[data-category="sleep"].active {
+    border-color: #1a1a2e;
+    box-shadow: 0 0 25px rgba(26, 26, 46, 0.6);
+}
+
+.category-card[data-category="meditate"].active {
+    border-color: #f77f00;
+    box-shadow: 0 0 25px rgba(247, 127, 0, 0.4);
+}
+
+.category-card[data-category="power-nap"].active {
+    border-color: #e1306c;
+    box-shadow: 0 0 25px rgba(225, 48, 108, 0.4);
+}
+
+.category-card .category-icon {
+    width: 32px;
+    height: 32px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.3s ease;
+}
+
+.category-card.active .category-icon {
+    color: white;
+}
+
+.category-card[data-category="focus"].active .category-icon {
+    color: #667eea;
+}
+
+.category-card[data-category="relax"].active .category-icon {
+    color: #43e97b;
+}
+
+.category-card[data-category="sleep"].active .category-icon {
+    color: #667eea;
+}
+
+.category-card[data-category="meditate"].active .category-icon {
+    color: #f77f00;
+}
+
+.category-card[data-category="power-nap"].active .category-icon {
+    color: #e1306c;
+}
+
+.category-card .category-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.category-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.category-wave {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Category Info Display */
+.category-info {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.category-info h3 {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.category-info p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.category-info .wave-type {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Audio Visualizer */
+.audio-visualizer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+/* Audio Controls */
+.audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.btn-audio {
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-audio:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-audio.playing {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: white;
+}
+
+.btn-audio svg {
+    width: 24px;
+    height: 24px;
+}
+
+.btn-audio .audio-play-icon {
+    display: block;
+}
+
+.btn-audio .audio-pause-icon {
+    display: none;
+}
+
+.btn-audio.playing .audio-play-icon {
+    display: none;
+}
+
+.btn-audio.playing .audio-pause-icon {
+    display: block;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-volume {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-volume:hover {
+    color: white;
+}
+
+.btn-volume svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-volume .volume-high {
+    display: block;
+}
+
+.btn-volume .volume-muted {
+    display: none;
+}
+
+.btn-volume.muted .volume-high {
+    display: none;
+}
+
+.btn-volume.muted .volume-muted {
+    display: block;
+}
+
+.volume-slider {
+    width: 80px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    appearance: none;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
 /* Control Buttons Container */
 .control-buttons {
     display: flex;
