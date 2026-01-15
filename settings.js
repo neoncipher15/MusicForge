@@ -1,174 +1,56 @@
 /**
  * Focus Forge - Settings Page
- * User settings, profile management, and data export/import
+ * Simple settings with localStorage (no login required)
  */
 
 // ==========================================
-// AUTHENTICATION FUNCTIONS
+// DATA FUNCTIONS
 // ==========================================
 
-/**
- * Get current session
- */
-function getCurrentSession() {
-    return JSON.parse(localStorage.getItem('focusForgeSession')) || 
-           JSON.parse(sessionStorage.getItem('focusForgeSession'));
+function getTasks() {
+    return JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
 }
 
-/**
- * Check if user is logged in
- */
-function isLoggedIn() {
-    return getCurrentSession() !== null;
+function getSessions() {
+    return JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
 }
 
-/**
- * Get current user ID
- */
-function getCurrentUserId() {
-    const session = getCurrentSession();
-    return session ? session.userId : null;
-}
-
-/**
- * Redirect to login if not logged in
- */
-function requireAuth() {
-    if (!isLoggedIn()) {
-        window.location.href = 'login.html';
-    }
-}
-
-/**
- * Logout user
- */
-function logoutUser() {
-    localStorage.removeItem('focusForgeSession');
-    sessionStorage.removeItem('focusForgeSession');
-    window.location.href = 'login.html';
-}
-
-/**
- * Get all users
- */
-function getAllUsers() {
-    return JSON.parse(localStorage.getItem('focusForgeUsers')) || {};
-}
-
-/**
- * Save all users
- */
-function saveAllUsers(users) {
-    localStorage.setItem('focusForgeUsers', JSON.stringify(users));
-}
-
-/**
- * Update user profile
- */
-function updateUserProfile(userId, updates) {
-    const users = getAllUsers();
-    if (users[userId]) {
-        users[userId] = { ...users[userId], ...updates };
-        saveAllUsers(users);
-        return true;
-    }
-    return false;
-}
-
-// ==========================================
-// USER DATA FUNCTIONS
-// ==========================================
-
-/**
- * Get user data object
- */
-function getUserData(userId) {
-    const key = `focusForgeData_${userId}`;
-    return JSON.parse(localStorage.getItem(key)) || {
-        tasks: [],
-        sessions: [],
-        scheduledTasks: {},
-        settings: {
-            soundEnabled: true,
-            timerDuration: 25
-        }
+function getSettings() {
+    return JSON.parse(localStorage.getItem('focusForgeSettings')) || {
+        soundEnabled: true,
+        timerDuration: 25
     };
 }
 
-/**
- * Save user data object
- */
-function saveUserData(userId, data) {
-    const key = `focusForgeData_${userId}`;
-    localStorage.setItem(key, JSON.stringify(data));
+function saveSettings(settings) {
+    localStorage.setItem('focusForgeSettings', JSON.stringify(settings));
 }
 
-/**
- * Get user's settings
- */
-function getUserSettings(userId) {
-    const data = getUserData(userId);
-    return data.settings;
-}
-
-/**
- * Save user's settings
- */
-function saveUserSettings(userId, settings) {
-    const data = getUserData(userId);
-    data.settings = { ...data.settings, ...settings };
-    saveUserData(userId, data);
-}
-
-/**
- * Get user sessions
- */
-function getUserSessions(userId) {
-    const data = getUserData(userId);
-    return data.sessions || [];
-}
-
-/**
- * Get user tasks
- */
-function getUserTasks(userId) {
-    const data = getUserData(userId);
-    return data.tasks || [];
-}
-
-/**
- * Get scheduled tasks
- */
-function getScheduledTasks(userId) {
-    const data = getUserData(userId);
-    return data.scheduledTasks || {};
+function clearAllData() {
+    localStorage.removeItem('focusForgeTasks');
+    localStorage.removeItem('focusForgeSessions');
+    localStorage.removeItem('focusForgeScheduledTasks');
+    localStorage.removeItem('focusForgeSettings');
+    localStorage.removeItem('focusForgeLastVisit');
+    localStorage.removeItem('focusForgeSound');
+    localStorage.removeItem('focusForgeTimerState');
 }
 
 // ==========================================
 // EXPORT/IMPORT FUNCTIONS
 // ==========================================
 
-/**
- * Export all user data to a JSON file
- */
-function exportUserData(userId) {
-    const users = getAllUsers();
-    const user = users[userId];
-    const userData = getUserData(userId);
-    
-    const exportData = {
+function exportData() {
+    const data = {
         version: '1.0',
         exportDate: new Date().toISOString(),
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        },
-        data: userData
+        tasks: getTasks(),
+        sessions: getSessions(),
+        scheduledTasks: JSON.parse(localStorage.getItem('focusForgeScheduledTasks')) || {},
+        settings: getSettings()
     };
     
-    // Create blob and download
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -178,60 +60,52 @@ function exportUserData(userId) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    return true;
+    showMessage('dataMessage', 'Data exported successfully!');
 }
 
-/**
- * Import data from a JSON file
- */
-function importUserData(file, userId) {
+function importData(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         
         reader.onload = (e) => {
             try {
-                const importData = JSON.parse(e.target.result);
+                const data = JSON.parse(e.target.result);
                 
-                // Validate import data
-                if (!importData.version || !importData.data) {
+                if (!data.version || !data.tasks) {
                     reject(new Error('Invalid backup file format'));
                     return;
                 }
                 
-                // Update user data
-                const currentData = getUserData(userId);
-                const newData = {
-                    ...currentData,
-                    tasks: importData.data.tasks || currentData.tasks,
-                    sessions: [
-                        ...(currentData.sessions || []),
-                        ...(importData.data.sessions || [])
-                    ],
-                    scheduledTasks: {
-                        ...(currentData.scheduledTasks || {}),
-                        ...(importData.data.scheduledTasks || {})
-                    },
-                    settings: {
-                        ...(currentData.settings || {}),
-                        ...(importData.data.settings || {})
-                    }
-                };
+                // Import tasks
+                if (data.tasks && Array.isArray(data.tasks)) {
+                    localStorage.setItem('focusForgeTasks', JSON.stringify(data.tasks));
+                }
                 
-                saveUserData(userId, newData);
+                // Import sessions
+                if (data.sessions && Array.isArray(data.sessions)) {
+                    localStorage.setItem('focusForgeSessions', JSON.stringify(data.sessions));
+                }
+                
+                // Import scheduled tasks
+                if (data.scheduledTasks) {
+                    localStorage.setItem('focusForgeScheduledTasks', JSON.stringify(data.scheduledTasks));
+                }
+                
+                // Import settings
+                if (data.settings) {
+                    localStorage.setItem('focusForgeSettings', JSON.stringify(data.settings));
+                }
                 
                 resolve({
-                    tasksImported: importData.data.tasks?.length || 0,
-                    sessionsImported: importData.data.sessions?.length || 0
+                    tasksImported: data.tasks?.length || 0,
+                    sessionsImported: data.sessions?.length || 0
                 });
             } catch (error) {
                 reject(new Error('Failed to parse backup file: ' + error.message));
             }
         };
         
-        reader.onerror = () => {
-            reject(new Error('Failed to read file'));
-        };
-        
+        reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsText(file);
     });
 }
@@ -240,9 +114,6 @@ function importUserData(file, userId) {
 // UI FUNCTIONS
 // ==========================================
 
-/**
- * Show message
- */
 function showMessage(elementId, message, type = 'success') {
     const element = document.getElementById(elementId);
     if (element) {
@@ -256,28 +127,8 @@ function showMessage(elementId, message, type = 'success') {
     }
 }
 
-/**
- * Load user profile
- */
-function loadProfile() {
-    const userId = getCurrentUserId();
-    const users = getAllUsers();
-    const user = users[userId];
-    
-    if (user) {
-        const displayNameInput = document.getElementById('displayName');
-        if (displayNameInput) {
-            displayNameInput.value = user.name || '';
-        }
-    }
-}
-
-/**
- * Load timer settings
- */
-function loadTimerSettings() {
-    const userId = getCurrentUserId();
-    const settings = getUserSettings(userId);
+function loadSettings() {
+    const settings = getSettings();
     
     const timerDuration = document.getElementById('timerDuration');
     const soundEnabled = document.getElementById('soundEnabled');
@@ -291,13 +142,9 @@ function loadTimerSettings() {
     }
 }
 
-/**
- * Load user stats
- */
-function loadUserStats() {
-    const userId = getCurrentUserId();
-    const sessions = getUserSessions(userId);
-    const tasks = getUserTasks(userId);
+function loadStats() {
+    const sessions = getSessions();
+    const tasks = getTasks();
     
     const totalSessions = sessions.length;
     const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
@@ -318,26 +165,6 @@ function loadUserStats() {
 // ==========================================
 
 function initEventListeners() {
-    const userId = getCurrentUserId();
-    
-    // Save profile
-    const saveProfileBtn = document.getElementById('saveProfile');
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', () => {
-            const displayName = document.getElementById('displayName').value.trim();
-            if (displayName) {
-                const success = updateUserProfile(userId, { name: displayName });
-                if (success) {
-                    showMessage('profileMessage', 'Profile saved successfully!');
-                } else {
-                    showMessage('profileMessage', 'Failed to save profile', 'error');
-                }
-            } else {
-                showMessage('profileMessage', 'Please enter a name', 'error');
-            }
-        });
-    }
-    
     // Save timer settings
     const saveTimerBtn = document.getElementById('saveTimerSettings');
     if (saveTimerBtn) {
@@ -345,22 +172,19 @@ function initEventListeners() {
             const timerDuration = parseInt(document.getElementById('timerDuration').value);
             const soundEnabled = document.getElementById('soundEnabled').checked;
             
-            saveUserSettings(userId, {
+            saveSettings({
                 timerDuration,
                 soundEnabled
             });
             
-            showMessage('timerMessage', 'Timer settings saved!');
+            showMessage('timerMessage', 'Settings saved!');
         });
     }
     
     // Export data
     const exportBtn = document.getElementById('exportData');
     if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            exportUserData(userId);
-            showMessage('dataMessage', 'Data exported successfully!');
-        });
+        exportBtn.addEventListener('click', exportData);
     }
     
     // Import data
@@ -371,14 +195,10 @@ function initEventListeners() {
             if (!file) return;
             
             try {
-                const result = await importUserData(file, userId);
+                const result = await importData(file);
                 showMessage('dataMessage', 
                     `Imported ${result.tasksImported} tasks and ${result.sessionsImported} sessions!`);
-                
-                // Refresh stats
-                loadUserStats();
-                
-                // Clear the input
+                loadStats();
                 e.target.value = '';
             } catch (error) {
                 showMessage('dataMessage', error.message, 'error');
@@ -387,10 +207,16 @@ function initEventListeners() {
         });
     }
     
-    // Logout button
-    const sidebarLogout = document.getElementById('sidebarLogout');
-    if (sidebarLogout) {
-        sidebarLogout.addEventListener('click', logoutUser);
+    // Clear data
+    const clearBtn = document.getElementById('clearData');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+                clearAllData();
+                loadStats();
+                showMessage('dataMessage', 'All data cleared!', 'success');
+            }
+        });
     }
     
     // Donation modal
@@ -422,18 +248,10 @@ function initEventListeners() {
 // ==========================================
 
 function init() {
-    // Check authentication
-    requireAuth();
-    
-    // Load all settings
-    loadProfile();
-    loadTimerSettings();
-    loadUserStats();
-    
-    // Initialize event listeners
+    loadSettings();
+    loadStats();
     initEventListeners();
 }
 
 // Start
 document.addEventListener('DOMContentLoaded', init);
-

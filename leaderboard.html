@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard - Focus Forge</title>
+    <title>Progress - Focus Forge</title>
     <link rel="icon" href="./image.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -14,7 +14,6 @@
             <div class="logo">
                 <span>Focus Forge</span>
             </div>
-        </div>
         <nav class="sidebar-nav">
             <a href="index.html" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -44,13 +43,7 @@
                 <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M7.5 21H2V9h5.5V21zm7.5 0H12V3H15v18zM22 1h-5.5v20H22V1z"/>
                 </svg>
-                <span>Leaderboard</span>
-            </a>
-            <a href="settings.html" class="nav-item">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/>
-                </svg>
-                <span>Settings</span>
+                <span>Progress</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -60,45 +53,31 @@
                 </svg>
                 <span>Donate</span>
             </button>
-            <button class="nav-item logout-trigger" id="sidebarLogout">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
-                <span>Logout</span>
-            </button>
         </div>
     </aside>
 
     <div class="main-wrapper">
         <div class="leaderboard-container">
             <div class="leaderboard-header">
-                <h1>Leaderboard</h1>
-                <p>See how you compare with other users</p>
+                <h1>Your Progress</h1>
+                <p>Track your focus journey</p>
             </div>
 
             <!-- User's Stats Card -->
             <div class="user-stats-card">
-                <div class="user-avatar" id="userAvatar">
+                <div class="user-avatar">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
                 </div>
                 <div class="user-info">
-                    <h2 id="currentUsername">User</h2>
-                    <p class="user-rank">Rank #<span id="currentRank">-</span></p>
+                    <h2>Your Focus Time</h2>
+                    <p class="user-rank">Sessions: <span id="yourSessionCount">0</span></p>
                 </div>
                 <div class="user-time">
-                    <span class="time-value" id="userTotalHours">0</span>
+                    <span class="time-value" id="yourTotalHours">0</span>
                     <span class="time-label">Hours</span>
                 </div>
-            </div>
-
-            <!-- Time Period Filter -->
-            <div class="leaderboard-filters">
-                <button class="leaderboard-filter active" data-period="all">All Time</button>
-                <button class="leaderboard-filter" data-period="month">This Month</button>
-                <button class="leaderboard-filter" data-period="week">This Week</button>
-            </div>
 
             <!-- Leaderboard List -->
             <div class="leaderboard-list" id="leaderboardList">
@@ -108,13 +87,12 @@
             <!-- Empty State -->
             <div class="leaderboard-empty" id="leaderboardEmpty">
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7.5 21H2V9h5.5V21zm7.5 0H12V3H15v18zM22 1h-5.5v20H22V1z"/>
+                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
                 </svg>
-                <h3>No Users Yet</h3>
-                <p>Be the first to start your focus journey!</p>
+                <h3>No Sessions Yet</h3>
+                <p>Complete your first focus session to see your progress!</p>
                 <a href="index.html" class="empty-btn">Start Focusing</a>
             </div>
-        </div>
     </div>
 
     <!-- Donation Modal -->
@@ -133,9 +111,7 @@
             </div>
             <p class="donation-thanks">Thank you for your generosity!</p>
         </div>
-    </div>
 
     <script src="leaderboard.js"></script>
 </body>
 </html>
-
