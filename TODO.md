@@ -1,44 +1,24 @@
 # TODO List for Productivity Website
 
-## 1. Create Shared Styles (styles.css) ✅
-- Implement glassmorphism UI (transparent backgrounds, blur effects).
-- Dark theme with black/dark gradients.
-- Brain.fm-like background (animated subtle particles/waves using particles.js via CDN).
-- Responsive design for mobile/desktop.
+## 1. Update UI Design
+- Remove header navigation, replace with sidebar navigation.
+- Update background to animated glow orbs like brain.fm (dark theme).
+- Make UI smooth and interactive (hover effects, transitions).
 
-## 2. Create Home Page (index.html) ✅
-- Navigation menu to other pages.
-- Pomodoro timer section (25-min work/5-min break cycles, start/pause/reset buttons).
-- Simple task list (add tasks, mark as complete).
-- Donation button (opens modal with image.png).
+## 2. Update All Pages
+- Replace header with sidebar in all HTML files (index.html, tasks.html, analytics.html, planner.html).
+- Ensure sidebar is responsive and collapsible.
 
-## 3. Create Tasks Page (tasks.html) ✅
-- Navigation menu.
-- Advanced task management: add, edit, delete, prioritize, filter by status/date.
-- Persist tasks in local storage.
-- Donation button.
+## 3. Update Styles (styles.css)
+- Remove header styles, add sidebar styles.
+- Enhance glassmorphism with smooth transitions.
+- Update particles.js config for glow orbs animation.
 
-## 4. Create Analytics Page (analytics.html) ✅
-- Navigation menu.
-- Display stats: total hours, sessions completed, tasks done.
-- Graph for daily task completion (using Chart.js via CDN).
-- Donation button.
+## 4. Update JavaScript (script.js)
+- Add sidebar toggle functionality.
+- Enhance interactions with smooth animations.
 
-## 5. Create Planner Page (planner.html) ✅
-- Navigation menu.
-- Calendar view (using FullCalendar via CDN) to add/view tasks on specific dates.
-- Persist calendar tasks in local storage.
-- Donation button.
-
-## 6. Create Shared JavaScript (script.js) ✅
-- Pomodoro timer logic.
-- Task management functions (CRUD, filtering).
-- Analytics calculations and graph rendering.
-- Calendar integration and task assignment.
-- Donation modal functionality.
-- Local storage handling for all data.
-
-## 7. Test and Finalize
-- Open index.html in browser to test functionality.
-- Ensure all pages work, data persists, and UI is responsive.
-- Add any missing features or fixes.
+## 5. Test and Finalize
+- Test sidebar navigation and responsiveness.
+- Verify smooth UI interactions and animations.
+- Ensure all features still work.
