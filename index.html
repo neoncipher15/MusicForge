@@ -144,8 +144,8 @@
 
         .timer-container {
             position: relative;
-            width: 260px;
-            height: 260px;
+            width: 320px;
+            height: 320px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -160,15 +160,15 @@
         .timer-ring-bg {
             fill: none;
             stroke: rgba(255, 255, 255, 0.04);
-            stroke-width: 5;
+            stroke-width: 6;
         }
 
         .timer-ring-progress {
             fill: none;
             stroke: url(#timerGradient);
-            stroke-width: 5;
+            stroke-width: 6;
             stroke-linecap: round;
-            stroke-dasharray: 754;
+            stroke-dasharray: 880;
             stroke-dashoffset: 0;
             transition: stroke-dashoffset 0.8s ease;
         }
@@ -196,7 +196,7 @@
         }
 
         .timer-time {
-            font-size: 3.5rem;
+            font-size: 4.5rem;
             font-weight: 300;
             line-height: 1;
             letter-spacing: 2px;
@@ -205,7 +205,7 @@
 
         .timer-seconds {
             color: rgba(255, 255, 255, 0.25);
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 200;
         }
 
@@ -752,10 +752,10 @@
             <!-- Timer Section -->
             <div class="timer-section">
                 <div class="timer-container">
-                    <svg class="timer-ring" viewBox="0 0 260 260">
-                        <circle class="timer-ring-bg" cx="130" cy="130" r="120"/>
-                        <circle class="timer-ring-progress" id="timerProgress" cx="130" cy="130" r="120"/>
-                        <circle class="timer-ring-dot" id="timerDot" cx="130" cy="10" r="5"/>
+                    <svg class="timer-ring" viewBox="0 0 320 320">
+                        <circle class="timer-ring-bg" cx="160" cy="160" r="150"/>
+                        <circle class="timer-ring-progress" id="timerProgress" cx="160" cy="160" r="150"/>
+                        <circle class="timer-ring-dot" id="timerDot" cx="160" cy="10" r="6"/>
                     </svg>
                     <div class="timer-content" onclick="openTimerModal()">
                         <div class="timer-time">
@@ -863,13 +863,13 @@
             timerSecondsEl.textContent = ':' + timerSeconds.toString().padStart(2, '0');
             
             const progress = currentSeconds / totalSeconds;
-            const circumference = 2 * Math.PI * 120;
+            const circumference = 2 * Math.PI * 150;
             const offset = circumference * (1 - progress);
             timerProgress.style.strokeDashoffset = offset;
             
             const angle = (progress * 2 * Math.PI) - Math.PI / 2;
-            const dotX = 130 + 120 * Math.cos(angle);
-            const dotY = 130 + 120 * Math.sin(angle);
+            const dotX = 160 + 150 * Math.cos(angle);
+            const dotY = 160 + 150 * Math.sin(angle);
             timerDot.setAttribute('cx', dotX);
             timerDot.setAttribute('cy', dotY);
         }
@@ -1009,13 +1009,13 @@
             timerSecondsEl.textContent = ':' + breakSeconds.toString().padStart(2, '0');
             
             const progress = breakCurrentSeconds / breakTotalSeconds;
-            const circumference = 2 * Math.PI * 120;
+            const circumference = 2 * Math.PI * 150;
             const offset = circumference * (1 - progress);
             timerProgress.style.strokeDashoffset = offset;
             
             const angle = (progress * 2 * Math.PI) - Math.PI / 2;
-            const dotX = 130 + 120 * Math.cos(angle);
-            const dotY = 130 + 120 * Math.sin(angle);
+            const dotX = 160 + 150 * Math.cos(angle);
+            const dotY = 160 + 150 * Math.sin(angle);
             timerDot.setAttribute('cx', dotX);
             timerDot.setAttribute('cy', dotY);
         }
