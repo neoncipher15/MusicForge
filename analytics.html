@@ -41,6 +41,7 @@
             left: 0;
             top: 0;
             height: 100vh;
+            z-index: 100;
         }
 
         .logo {
@@ -81,6 +82,7 @@
             font-weight: 400;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-decoration: none;
         }
 
         .nav-item:hover {
@@ -127,7 +129,6 @@
         .page-header {
             text-align: center;
             margin-bottom: 3rem;
-            animation: fadeInDown 0.6s ease;
         }
 
         .page-title {
@@ -147,7 +148,6 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
             margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease 0.1s both;
         }
 
         .stat-card {
@@ -199,7 +199,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 24px;
             padding: 2rem;
-            animation: fadeInUp 0.6s ease 0.2s both;
         }
 
         .chart-title {
@@ -239,6 +238,7 @@
             transition: all 0.5s ease;
             position: relative;
             opacity: 0.8;
+            min-height: 4px;
         }
 
         .bar:hover {
@@ -267,29 +267,103 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal {
+            background: rgba(20, 20, 35, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .donate-modal .modal {
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .donate-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .donate-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .donate-text {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 1.5rem;
+        }
+
+        .donate-image {
+            width: 100%;
+            max-width: 280px;
+            border-radius: 16px;
+            display: block;
+            margin: 0 auto;
+        }
+
         /* Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         @keyframes growBar {
             from {
                 height: 0;
@@ -337,6 +411,19 @@
     </style>
 </head>
 <body>
+    <!-- Donate Modal -->
+    <div class="modal-overlay donate-modal" id="donateModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeDonateModal()">✕</button>
+            </div>
+            <div class="donate-icon">❤️</div>
+            <h2 class="donate-title">Support Focus Forge</h2>
+            <p class="donate-text">Your support helps us keep building amazing features!</p>
+            <img class="donate-image" src="image.png" alt="Donate QR Code" onerror="this.style.display='none'">
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -346,18 +433,18 @@
             </div>
             
             <nav class="nav-menu">
-                <div class="nav-item" onclick="window.location.href='index.html'">
+                <a href="index.html" class="nav-item">
                     <span class="icon">🏠</span>
                     <span>Home</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='index.html'">
+                </a>
+                <a href="tasks.html" class="nav-item">
                     <span class="icon">☑️</span>
                     <span>Tasks</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='index.html'">
+                </a>
+                <a href="planner.html" class="nav-item">
                     <span class="icon">📅</span>
                     <span>Calendar</span>
-                </div>
+                </a>
                 <div class="nav-item active">
                     <span class="icon">📊</span>
                     <span>Analytics</span>
@@ -369,20 +456,6 @@
                 <span>Donate</span>
             </div>
         </aside>
-
-        <!-- Donate Modal -->
-        <div class="modal-overlay donate-modal" id="donateModal">
-            <div class="modal">
-                <div class="modal-header">
-                    <button class="modal-close" onclick="closeDonateModal()">✕</button>
-                </div>
-                <div class="donate-icon">❤️</div>
-                <h2 class="donate-title">Support Focus Forge</h2>
-                <p class="donate-text">Your support helps us keep building amazing features!</p>
-                <img class="donate-image" src="image.png" alt="Donate" onerror="this.style.display='none'; document.getElementById('qrCode').style.display='block'">
-                <img id="qrCode" class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='white' width='200' height='200'/%3E%3Crect fill='black' x='10' y='10' width='50' height='50'/%3E%3Crect fill='black' x='70' y='10' width='50' height='50'/%3E%3Crect fill='black' x='140' y='10' width='50' height='50'/%3E%3Crect fill='black' x='10' y='70' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='50' height='50'/%3E%3Crect fill='black' x='140' y='70' width='50' height='50'/%3E%3Crect fill='black' x='10' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='140' width='50' height='50'/%3E%3Crect fill='black' x='140' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='10' height='10'/%3E%3C/svg%3E" style="display:none">
-            </div>
-        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -422,31 +495,31 @@
                 <div class="chart-container">
                     <div class="bar-chart" id="weeklyChart">
                         <div class="bar-item">
-                            <div class="bar" style="height: 15px;" data-value="15m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Mon</span>
                         </div>
                         <div class="bar-item">
-                            <div class="bar" style="height: 25px;" data-value="25m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Tue</span>
                         </div>
                         <div class="bar-item">
-                            <div class="bar" style="height: 10px;" data-value="10m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Wed</span>
                         </div>
                         <div class="bar-item">
-                            <div class="bar" style="height: 20px;" data-value="20m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Thu</span>
                         </div>
                         <div class="bar-item">
-                            <div class="bar" style="height: 5px;" data-value="5m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Fri</span>
                         </div>
                         <div class="bar-item">
-                            <div class="bar" style="height: 30px;" data-value="30m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Sat</span>
                         </div>
                         <div class="bar-item">
-                            <div class="bar" style="height: 40px;" data-value="40m"></div>
+                            <div class="bar" style="height: 4px;" data-value="0m"></div>
                             <span class="bar-label">Sun</span>
                         </div>
                     </div>
@@ -464,18 +537,16 @@
             const focusTime = JSON.parse(localStorage.getItem('focusForgeTotalTime')) || 0;
             
             const completedTasks = tasks.filter(t => t.category === 'completed').length;
-            const totalTasks = tasks.length;
             
             // Count calendar tasks
             let calendarTaskCount = 0;
             Object.values(calendarTasks).forEach(dayTasks => {
-                calendarTaskCount += dayTasks.length;
+                calendarTaskCount += dayTasks.filter(t => t.completed).length;
             });
             
             // Get weekly focus data (last 7 days)
             const today = new Date();
             const weeklyData = [];
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             
             for (let i = 6; i >= 0; i--) {
                 const date = new Date(today);
@@ -565,12 +636,6 @@
             });
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            updateStats();
-            updateChart();
-        });
-
         // Modal functions
         function openDonateModal() {
             document.getElementById('donateModal').classList.add('active');
@@ -581,12 +646,23 @@
         }
 
         // Close modal on overlay click
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) {
-                    overlay.classList.remove('active');
-                }
-            });
+        document.getElementById('donateModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('donateModal')) {
+                closeDonateModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDonateModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+            updateChart();
         });
     </script>
 </body>
