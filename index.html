@@ -13,39 +13,73 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
+            background: linear-gradient(180deg, #000000 0%, #0d0d15 50%, #050508 100%);
         }
 
-        .content {
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem 0;
             display: flex;
             flex-direction: column;
+        }
+
+        .sidebar-item {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-
-        .title {
-            font-family: 'Arial', sans-serif;
-            font-size: 4rem;
-            font-weight: 300;
-            color: #ffffff;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-            letter-spacing: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .subtitle {
-            font-family: 'Arial', sans-serif;
-            font-size: 1.2rem;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
             color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 0.3rem;
-            text-transform: uppercase;
+            font-family: 'Arial', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .sidebar-item .icon {
+            font-size: 1.25rem;
+        }
+
+        .sidebar-item.donate {
+            margin-top: auto;
         }
     </style>
 </head>
 <body>
-   
+    <nav class="sidebar">
+        <div class="sidebar-item">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+        </div>
+        <div class="sidebar-item">
+            <span class="icon">☑️</span>
+            <span>Task</span>
+        </div>
+        <div class="sidebar-item">
+            <span class="icon">📅</span>
+            <span>Planner</span>
+        </div>
+        <div class="sidebar-item">
+            <span class="icon">📊</span>
+            <span>Analytics</span>
+        </div>
+        <div class="sidebar-item donate">
+            <span class="icon">❤️</span>
+            <span>Donate</span>
+        </div>
+    </nav>
 </body>
 </html>
 
