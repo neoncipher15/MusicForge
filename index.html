@@ -783,9 +783,16 @@
                         <div class="timer-time">
                             <span id="timerMinutes">15</span><span class="timer-seconds" id="timerSeconds">:00</span>
                         </div>
+                    </div>
                 </div>
                 
-              
+                <div class="timer-presets">
+                    <button class="preset-btn" data-minutes="5">5m</button>
+                    <button class="preset-btn active" data-minutes="15">15m</button>
+                    <button class="preset-btn" data-minutes="25">25m</button>
+                    <button class="preset-btn" data-minutes="45">45m</button>
+                    <button class="preset-btn" data-minutes="60">60m</button>
+                </div>
                 
                 <div class="timer-controls">
                     <button class="control-btn" id="soundBtn" title="Sound">🔊</button>
@@ -795,7 +802,21 @@
                 
                 <div class="timer-hint">Click timer to customize</div>
             </div>
-           
+
+            <!-- Tasks Panel -->
+            <div class="tasks-panel">
+                <div class="tasks-header">
+                    <h2 class="tasks-title">Today's Tasks</h2>
+                    <span class="tasks-count" id="tasksCount">0 remaining</span>
+                </div>
+                <div class="task-input-container">
+                    <input type="text" class="task-input" id="taskInput" placeholder="Add a new task...">
+                    <button class="add-task-btn" id="addTaskBtn">+</button>
+                </div>
+                <div class="tasks-list" id="tasksList">
+                    <div class="empty-tasks">No tasks yet. Add one above!</div>
+                </div>
+            </div>
         </main>
     </div>
 
