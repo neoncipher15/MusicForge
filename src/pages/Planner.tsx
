@@ -1,0 +1,341 @@
+import React, { useState } from 'react'
+import { ChevronLeft, ChevronRight, Plus, Trash2, Target, Coffee, Clock, Calendar } from 'lucide-react'
+
+interface PlanItem {
+  id: string
+  title: string
+  type: 'focus' | 'break'
+  duration: number
+  completed: boolean
+}
+
+interface DayPlan {
+  date: Date
+  items: PlanItem[]
+}
+
+const PlannerPage: React.FC = () => {
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [plans, setPlans] = useState<Map<string, DayPlan>>(new Map())
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [newPlanTitle, setNewPlanTitle] = useState('')
+  const [newPlanType, setNewPlanType] = useState<'focus' | 'break'>('focus')
+  const [newPlanDuration, setNewPlanDuration] = useState(25)
+
+  const getWeekDays = () => {
+    const days = []
+    const startOfWeek = new Date(currentDate)
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay())
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek)
+      date.setDate(startOfWeek.getDate() + i)
+      days.push(date)
+    }
+    return days
+  }
+
+  const weekDays = getWeekDays()
+  const timeSlots = Array.from({ length: 12 }, (_, i) => i + 8) // 8 AM to 7 PM
+
+  const getKey = (date: Date) => date.toISOString().split('T')[0]
+
+  const getPlanForDate = (date: Date): DayPlan => {
+    const key = getKey(date)
+    return plans.get(key) || { date, items: [] }
+  }
+
+  const addPlan = () => {
+    if (!selectedDate || !newPlanTitle.trim()) return
+    const key = getKey(selectedDate)
+    const existingPlan = plans.get(key) || { date: selectedDate, items: [] }
+    const newItem: PlanItem = {
+      id: crypto.randomUUID(),
+      title: newPlanTitle,
+      type: newPlanType,
+      duration: newPlanDuration,
+      completed: false
+    }
+    const updatedPlan = { ...existingPlan, items: [...existingPlan.items, newItem].sort((a, b) => {
+      const aTime = a.type === 'focus' ? 0 : 1000
+      const bTime = b.type === 'focus' ? 0 : 1000
+      return aTime - bTime + Math.random() * 100
+    })}
+    setPlans(prev => new Map(prev).set(key, updatedPlan))
+    setShowAddModal(false)
+    setNewPlanTitle('')
+    setNewPlanType('focus')
+    setNewPlanDuration(25)
+  }
+
+  const togglePlanItem = (date: Date, itemId: string) => {
+    const key = getKey(date)
+    const plan = plans.get(key)
+    if (plan) {
+      const updatedPlan = {
+        ...plan,
+        items: plan.items.map(item => item.id === itemId ? { ...item, completed: !item.completed } : item)
+      }
+      setPlans(prev => new Map(prev).set(key, updatedPlan))
+    }
+  }
+
+  const deletePlanItem = (date: Date, itemId: string) => {
+    const key = getKey(date)
+    const plan = plans.get(key)
+    if (plan) {
+      const updatedPlan = {
+        ...plan,
+        items: plan.items.filter(item => item.id !== itemId)
+      }
+      if (updatedPlan.items.length === 0) {
+        const newPlans = new Map(plans)
+        newPlans.delete(key)
+        setPlans(newPlans)
+      } else {
+        setPlans(prev => new Map(prev).set(key, updatedPlan))
+      }
+    }
+  }
+
+  const navigateWeek = (direction: number) => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(currentDate.getDate() + direction * 7)
+    setCurrentDate(newDate)
+  }
+
+  const isToday = (date: Date) => {
+    const today = new Date()
+    return date.toDateString() === today.toDateString()
+  }
+
+  const formatDateKey = (date: Date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  }
+
+  const totalPlannedFocus = weekDays.reduce((acc, date) => {
+    const plan = getPlanForDate(date)
+    return acc + plan.items.filter(i => i.type === 'focus').length
+  }, 0)
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Planner</h1>
+          <p className="text-gray-400">Plan your week and stay organized</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/30">
+            <span className="font-semibold">{totalPlannedFocus}</span> focus sessions planned
+          </div>
+        </div>
+      </div>
+
+      {/* Week Navigation */}
+      <div className="flex items-center justify-between mb-6">
+        <button onClick={() => navigateWeek(-1)} className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:bg-gray-700/50 transition-colors">
+          <ChevronLeft size={24} className="text-gray-400" />
+        </button>
+        <h2 className="text-xl font-semibold text-white">
+          {weekDays[0].toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        </h2>
+        <button onClick={() => navigateWeek(1)} className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:bg-gray-700/50 transition-colors">
+          <ChevronRight size={24} className="text-gray-400" />
+        </button>
+      </div>
+
+      {/* Week Grid */}
+      <div className="grid grid-cols-7 gap-4 mb-8">
+        {weekDays.map((date) => {
+          const plan = getPlanForDate(date)
+          const focusCount = plan.items.filter(i => i.type === 'focus').length
+          const completedCount = plan.items.filter(i => i.completed).length
+          return (
+            <div
+              key={date.toISOString()}
+              className={`p-4 rounded-2xl border transition-all duration-300 ${
+                isToday(date)
+                  ? 'bg-purple-500/10 border-purple-500/30'
+                  : 'bg-gray-800/50 border-gray-700/50'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className={`text-sm ${isToday(date) ? 'text-purple-400 font-semibold' : 'text-gray-400'}`}>
+                  {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                </span>
+                <span className={`text-lg font-bold ${isToday(date) ? 'text-purple-400' : 'text-white'}`}>
+                  {date.getDate()}
+                </span>
+              </div>
+              <div className="space-y-2 mb-3">
+                {plan.items.slice(0, 3).map((item) => (
+                  <div key={item.id} className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
+                    item.completed ? 'bg-green-500/10' : item.type === 'focus' ? 'bg-red-500/10' : 'bg-green-500/10'
+                  }`}>
+                    {item.type === 'focus' ? <Target size={12} className="text-red-400" /> : <Coffee size={12} className="text-green-400" />}
+                    <span className={`flex-1 truncate ${item.completed ? 'text-gray-500 line-through' : 'text-gray-300'}`}>{item.title}</span>
+                  </div>
+                ))}
+                {plan.items.length > 3 && (
+                  <p className="text-xs text-gray-500 text-center">+{plan.items.length - 3} more</p>
+                )}
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>{focusCount} focus</span>
+                <span>{completedCount}/{plan.items.length} done</span>
+              </div>
+              <button
+                onClick={() => { setSelectedDate(date); setShowAddModal(true) }}
+                className="w-full mt-3 py-2 bg-gray-700/50 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors flex items-center justify-center gap-1 text-sm"
+              >
+                <Plus size={14} /> Add
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Today's Detailed Schedule */}
+      <div className="p-6 rounded-2xl bg-gray-800/50 border border-gray-700/50">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <Calendar size={24} className="text-purple-400" />
+            Today\'s Schedule - {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </h2>
+          <button
+            onClick={() => { setSelectedDate(new Date()); setShowAddModal(true) }}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/30 hover:bg-purple-500/30 transition-colors"
+          >
+            <Plus size={18} /> Add Item
+          </button>
+        </div>
+
+        {(() => {
+          const todayPlan = getPlanForDate(new Date())
+          if (todayPlan.items.length === 0) {
+            return (
+              <div className="text-center py-12">
+                <Clock size={48} className="mx-auto text-gray-600 mb-4" />
+                <p className="text-gray-400">No items planned for today.</p>
+                <p className="text-gray-500 text-sm mt-2">Add items to start planning your day!</p>
+              </div>
+            )
+          }
+          return (
+            <div className="space-y-3">
+              {todayPlan.items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 ${
+                    item.completed
+                      ? 'bg-green-500/10 border-green-500/30'
+                      : item.type === 'focus'
+                      ? 'bg-red-500/10 border-red-500/30'
+                      : 'bg-green-500/10 border-green-500/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700/50 text-gray-400 font-medium text-sm">
+                    {index + 1}
+                  </div>
+                  <div className={`p-2 rounded-lg ${item.type === 'focus' ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
+                    {item.type === 'focus' ? <Target size={20} className="text-red-400" /> : <Coffee size={20} className="text-green-400" />}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className={`font-medium ${item.completed ? 'text-gray-500 line-through' : 'text-white'}`}>{item.title}</h3>
+                    <p className="text-sm text-gray-400">{item.duration} minutes • {item.type === 'focus' ? 'Focus Session' : 'Break'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => togglePlanItem(new Date(), item.id)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        item.completed
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-gray-700/50 text-gray-400 hover:bg-green-500/20 hover:text-green-400'
+                      }`}
+                    >
+                      {item.completed ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => deletePlanItem(new Date(), item.id)}
+                      className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            </div>
+          )
+        })()}
+      </div>
+
+      {/* Add Modal */}
+      {showAddModal && selectedDate && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md animate-scale-in">
+            <h3 className="text-xl font-semibold text-white mb-4">Add to Plan - {selectedDate.toLocaleDateString()}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Title</label>
+                <input
+                  type="text"
+                  value={newPlanTitle}
+                  onChange={(e) => setNewPlanTitle(e.target.value)}
+                  placeholder="What do you want to plan?"
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Type</label>
+                  <select
+                    value={newPlanType}
+                    onChange={(e) => setNewPlanType(e.target.value as 'focus' | 'break')}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="focus">Focus Session</option>
+                    <option value="break">Break</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Duration (min)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    value={newPlanDuration}
+                    onChange={(e) => setNewPlanDuration(parseInt(e.target.value) || 25)}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={addPlan}
+                disabled={!newPlanTitle.trim()}
+                className="flex-1 px-4 py-3 bg-green-500/20 text-green-400 rounded-xl border border-green-500/30 hover:bg-green-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add to Plan
+              </button>
+              <button
+                onClick={() => { setShowAddModal(false); setNewPlanTitle('') }}
+                className="flex-1 px-4 py-3 bg-gray-500/20 text-gray-400 rounded-xl border border-gray-500/30 hover:bg-gray-500/30 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default PlannerPage
+

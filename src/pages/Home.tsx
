@@ -1,0 +1,117 @@
+import React from 'react'
+import { Clock, Target, TrendingUp, Award, Calendar, Play, Coffee, Brain, Zap } from 'lucide-react'
+import { usePomodoro } from '../context/PomodoroContext'
+
+const HomePage: React.FC = () => {
+  const { todayFocusTime, completedPomodoros, sessions, mode, setMode } = usePomodoro()
+
+  const weeklyPomodoros = sessions.filter(session => {
+    const sessionDate = new Date(session.completedAt)
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    return sessionDate >= weekAgo && session.mode === 'focus'
+  }).length
+
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+
+  const quickStats = [
+    { label: 'Today\'s Focus', value: `${Math.floor(todayFocusTime / 60)}h ${todayFocusTime % 60}m`, icon: Clock, color: 'text-red-400', bgColor: 'bg-red-500/20' },
+    { label: 'Pomodoros', value: completedPomodoros, icon: Target, color: 'text-green-400', bgColor: 'bg-green-500/20' },
+    { label: 'This Week', value: weeklyPomodoros, icon: TrendingUp, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+    { label: 'Best Streak', value: '5 days', icon: Award, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' }
+  ]
+
+  const achievements = [
+    { title: 'First Pomodoro', description: 'Complete your first focus session', earned: completedPomodoros >= 1, icon: Play },
+    { title: 'Productive Day', description: 'Complete 8+ pomodoros in a day', earned: completedPomodoros >= 8, icon: Brain },
+    { title: 'Week Warrior', description: 'Complete 30+ pomodoros in a week', earned: weeklyPomodoros >= 30, icon: Zap },
+    { title: 'Focus Master', description: 'Complete 100 pomodoros total', earned: sessions.filter(s => s.mode === 'focus').length >= 100, icon: Coffee }
+  ]
+
+  return (
+    <div className="animate-fade-in">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">{greeting}! 👋</h1>
+        <p className="text-gray-400">Ready to be productive today?</p>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-white mb-4">Quick Start</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button onClick={() => setMode('focus')} className={`p-6 rounded-2xl transition-all duration-300 hover:scale-105 ${mode === 'focus' ? 'bg-red-500/20 border-2 border-red-500/50' : 'bg-gray-800/50 border-2 border-gray-700/50 hover:border-gray-600'}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center"><Target size={28} className="text-red-400" /></div>
+              <div className="text-left"><h3 className="text-lg font-semibold text-white">Focus Time</h3><p className="text-sm text-gray-400">25 minutes of deep work</p></div>
+            </div>
+          </button>
+          <button onClick={() => setMode('shortBreak')} className={`p-6 rounded-2xl transition-all duration-300 hover:scale-105 ${mode === 'shortBreak' ? 'bg-green-500/20 border-2 border-green-500/50' : 'bg-gray-800/50 border-2 border-gray-700/50 hover:border-gray-600'}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center"><Coffee size={28} className="text-green-400" /></div>
+              <div className="text-left"><h3 className="text-lg font-semibold text-white">Short Break</h3><p className="text-sm text-gray-400">5 minutes to recharge</p></div>
+            </div>
+          </button>
+          <button onClick={() => setMode('longBreak')} className={`p-6 rounded-2xl transition-all duration-300 hover:scale-105 ${mode === 'longBreak' ? 'bg-blue-500/20 border-2 border-blue-500/50' : 'bg-gray-800/50 border-2 border-gray-700/50 hover:border-gray-600'}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-blue-500/20 flex items-center justify-center"><Brain size={28} className="text-blue-400" /></div>
+              <div className="text-left"><h3 className="text-lg font-semibold text-white">Long Break</h3><p className="text-sm text-gray-400">15 minutes for a rest</p></div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-white mb-4">Today\'s Progress</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {quickStats.map((stat) => (
+            <div key={stat.label} className="p-5 rounded-2xl bg-gray-800/50 border border-gray-700/50 hover:border-gray-600 transition-all duration-300 hover:scale-105">
+              <div className="flex items-center gap-3 mb-3"><div className={`w-10 h-10 rounded-xl ${stat.bgColor} flex items-center justify-center`}><stat.icon size={20} className={stat.color} /></div></div>
+              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-sm text-gray-400">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-white mb-4">Achievements</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {achievements.map((achievement) => (
+            <div key={achievement.title} className={`p-5 rounded-2xl border transition-all duration-300 ${achievement.earned ? 'bg-yellow-500/10 border-yellow-500/30 hover:border-yellow-500/50' : 'bg-gray-800/30 border-gray-700/30 opacity-60'}`}>
+              <div className="flex items-center gap-3 mb-3"><div className={`w-12 h-12 rounded-xl flex items-center justify-center ${achievement.earned ? 'bg-yellow-500/20' : 'bg-gray-700/50'}`}><achievement.icon size={24} className={achievement.earned ? 'text-yellow-400' : 'text-gray-500'} /></div></div>
+              <h3 className={`font-semibold ${achievement.earned ? 'text-white' : 'text-gray-500'}`}>{achievement.title}</h3>
+              <p className="text-sm text-gray-400 mt-1">{achievement.description}</p>
+              {achievement.earned && <div className="mt-3 flex items-center gap-1 text-yellow-400"><span className="text-xs">✓ Earned</span></div>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
+        <div className="p-6 rounded-2xl bg-gray-800/50 border border-gray-700/50">
+          {sessions.length === 0 ? (
+            <div className="text-center py-8"><Calendar size={48} className="mx-auto text-gray-600 mb-4" /><p className="text-gray-400">No sessions completed yet today.</p><p className="text-gray-500 text-sm mt-2">Start your first pomodoro!</p></div>
+          ) : (
+            <div className="space-y-4">
+              {sessions.slice(-5).reverse().map((session) => (
+                <div key={session.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-700/30 border border-gray-600/30">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${session.mode === 'focus' ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
+                      {session.mode === 'focus' ? <Target size={20} className="text-red-400" /> : <Coffee size={20} className="text-green-400" />}
+                    </div>
+                    <div><p className="font-medium text-white">{session.mode === 'focus' ? 'Focus Session' : 'Break'}</p><p className="text-sm text-gray-400">{new Date(session.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p></div>
+                  </div>
+                  <div className="text-right"><p className={`font-semibold ${session.mode === 'focus' ? 'text-red-400' : 'text-green-400'}`}>{Math.round(session.duration / 60)} min</p></div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default HomePage
+
