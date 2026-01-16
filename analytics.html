@@ -364,11 +364,25 @@
                 </div>
             </nav>
             
-            <a href="image.png" class="donate-link" target="_blank">
+            <div class="donate-link" onclick="openDonateModal()">
                 <span>❤️</span>
                 <span>Donate</span>
-            </a>
+            </div>
         </aside>
+
+        <!-- Donate Modal -->
+        <div class="modal-overlay donate-modal" id="donateModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <button class="modal-close" onclick="closeDonateModal()">✕</button>
+                </div>
+                <div class="donate-icon">❤️</div>
+                <h2 class="donate-title">Support Focus Forge</h2>
+                <p class="donate-text">Your support helps us keep building amazing features!</p>
+                <img class="donate-image" src="image.png" alt="Donate" onerror="this.style.display='none'; document.getElementById('qrCode').style.display='block'">
+                <img id="qrCode" class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='white' width='200' height='200'/%3E%3Crect fill='black' x='10' y='10' width='50' height='50'/%3E%3Crect fill='black' x='70' y='10' width='50' height='50'/%3E%3Crect fill='black' x='140' y='10' width='50' height='50'/%3E%3Crect fill='black' x='10' y='70' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='50' height='50'/%3E%3Crect fill='black' x='140' y='70' width='50' height='50'/%3E%3Crect fill='black' x='10' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='140' width='50' height='50'/%3E%3Crect fill='black' x='140' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='10' height='10'/%3E%3C/svg%3E" style="display:none">
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -442,14 +456,47 @@
     </div>
 
     <script>
-        // Analytics Data
-        const analyticsData = {
-            totalFocusTime: 145, // minutes
-            totalSessions: 8,
-            avgPerDay: 20.7, // minutes
-            tasksDone: 24,
-            weeklyData: [15, 25, 10, 20, 5, 30, 40] // minutes per day
-        };
+        // Get real data from localStorage
+        function getAnalyticsData() {
+            const tasks = JSON.parse(localStorage.getItem('focusForgeTasks')) || [];
+            const calendarTasks = JSON.parse(localStorage.getItem('focusForgeCalendarTasks')) || {};
+            const focusSessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+            const focusTime = JSON.parse(localStorage.getItem('focusForgeTotalTime')) || 0;
+            
+            const completedTasks = tasks.filter(t => t.category === 'completed').length;
+            const totalTasks = tasks.length;
+            
+            // Count calendar tasks
+            let calendarTaskCount = 0;
+            Object.values(calendarTasks).forEach(dayTasks => {
+                calendarTaskCount += dayTasks.length;
+            });
+            
+            // Get weekly focus data (last 7 days)
+            const today = new Date();
+            const weeklyData = [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateKey = date.toISOString().split('T')[0];
+                const dayFocus = focusSessions.filter(s => s.date === dateKey).reduce((sum, s) => sum + s.duration, 0);
+                weeklyData.push(dayFocus);
+            }
+            
+            const totalFocusTime = focusTime;
+            const totalSessions = focusSessions.length;
+            const avgPerDay = totalFocusTime > 0 ? (totalFocusTime / 7).toFixed(1) : 0;
+            
+            return {
+                totalFocusTime,
+                totalSessions,
+                avgPerDay,
+                tasksDone: completedTasks + calendarTaskCount,
+                weeklyData
+            };
+        }
 
         // Animate numbers
         function animateNumber(element, target, suffix = '') {
@@ -463,10 +510,14 @@
                 const easeOut = 1 - Math.pow(1 - progress, 3);
                 const current = start + (target - start) * easeOut;
                 
-                if (suffix === 'm' && element.id === 'avgPerDay') {
-                    element.textContent = current.toFixed(1) + suffix;
-                } else if (suffix === 'm') {
-                    element.textContent = Math.round(current) + suffix;
+                if (suffix === 'm') {
+                    if (target >= 60) {
+                        const hours = Math.floor(current / 60);
+                        const mins = Math.round(current % 60);
+                        element.textContent = mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+                    } else {
+                        element.textContent = Math.round(current) + suffix;
+                    }
                 } else {
                     element.textContent = Math.round(current);
                 }
@@ -481,22 +532,31 @@
 
         // Update stats with animation
         function updateStats() {
-            animateNumber(document.getElementById('totalFocus'), analyticsData.totalFocusTime, 'm');
-            animateNumber(document.getElementById('totalSessions'), analyticsData.totalSessions);
-            animateNumber(document.getElementById('avgPerDay'), analyticsData.avgPerDay, 'm');
-            animateNumber(document.getElementById('tasksDone'), analyticsData.tasksDone);
+            const data = getAnalyticsData();
+            animateNumber(document.getElementById('totalFocus'), data.totalFocusTime, 'm');
+            animateNumber(document.getElementById('totalSessions'), data.totalSessions);
+            animateNumber(document.getElementById('avgPerDay'), parseFloat(data.avgPerDay), 'm');
+            animateNumber(document.getElementById('tasksDone'), data.tasksDone);
         }
 
         // Update chart with animation
         function updateChart() {
+            const data = getAnalyticsData();
             const bars = document.querySelectorAll('.bar');
-            const maxValue = Math.max(...analyticsData.weeklyData, 1);
-            const maxHeight = 200; // max bar height in pixels
+            const maxValue = Math.max(...data.weeklyData, 1);
+            const maxHeight = 200;
             
             bars.forEach((bar, index) => {
-                const value = analyticsData.weeklyData[index];
-                const height = (value / maxValue) * maxHeight;
-                const displayValue = value < 60 ? `${value}m` : `${(value / 60).toFixed(1)}h`;
+                const value = data.weeklyData[index];
+                const height = Math.max((value / maxValue) * maxHeight, 4);
+                let displayValue;
+                if (value >= 60) {
+                    displayValue = `${(value / 60).toFixed(1)}h`;
+                } else if (value > 0) {
+                    displayValue = `${value}m`;
+                } else {
+                    displayValue = '0m';
+                }
                 
                 setTimeout(() => {
                     bar.style.height = height + 'px';
@@ -509,6 +569,24 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateStats();
             updateChart();
+        });
+
+        // Modal functions
+        function openDonateModal() {
+            document.getElementById('donateModal').classList.add('active');
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
         });
     </script>
 </body>

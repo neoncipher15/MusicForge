@@ -474,11 +474,25 @@
                 </div>
             </nav>
             
-            <a href="image.png" class="donate-link" target="_blank">
+            <div class="donate-link" onclick="openDonateModal()">
                 <span>❤️</span>
                 <span>Donate</span>
-            </a>
+            </div>
         </aside>
+
+        <!-- Donate Modal -->
+        <div class="modal-overlay donate-modal" id="donateModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <button class="modal-close" onclick="closeDonateModal()">✕</button>
+                </div>
+                <div class="donate-icon">❤️</div>
+                <h2 class="donate-title">Support Focus Forge</h2>
+                <p class="donate-text">Your support helps us keep building amazing features!</p>
+                <img class="donate-image" src="image.png" alt="Donate" onerror="this.style.display='none'; document.getElementById('qrCode').style.display='block'">
+                <img id="qrCode" class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='white' width='200' height='200'/%3E%3Crect fill='black' x='10' y='10' width='50' height='50'/%3E%3Crect fill='black' x='70' y='10' width='50' height='50'/%3E%3Crect fill='black' x='140' y='10' width='50' height='50'/%3E%3Crect fill='black' x='10' y='70' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='50' height='50'/%3E%3Crect fill='black' x='140' y='70' width='50' height='50'/%3E%3Crect fill='black' x='10' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='140' width='50' height='50'/%3E%3Crect fill='black' x='140' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='10' height='10'/%3E%3C/svg%3E" style="display:none">
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -669,6 +683,24 @@
         // Initialize
         updateTimerDisplay();
         renderTasks();
+
+        // Modal functions
+        function openDonateModal() {
+            document.getElementById('donateModal').classList.add('active');
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
