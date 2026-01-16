@@ -8,7 +8,10 @@
 </head>
 <body>
   <div id="particles-js"></div>
-  <header class="glass">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button class="sidebar-toggle">☰</button>
     <h1>Productivity Hub</h1>
     <nav>
       <ul>
@@ -19,28 +22,31 @@
       </ul>
     </nav>
     <button class="donation-btn" onclick="openDonationModal()">Donate</button>
-  </header>
+  </div>
 
-  <div class="container">
-    <section class="timer-section glass">
-      <h2>Pomodoro Timer</h2>
-      <div class="timer-display" id="timer-display">25:00</div>
-      <div class="timer-controls">
-        <button id="start-btn">Start</button>
-        <button id="pause-btn">Pause</button>
-        <button id="reset-btn">Reset</button>
-      </div>
-      <p id="timer-status">Work Session</p>
-    </section>
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <section class="timer-section glass">
+        <h2>Pomodoro Timer</h2>
+        <div class="timer-display" id="timer-display">25:00</div>
+        <div class="timer-controls">
+          <button id="start-btn">Start</button>
+          <button id="pause-btn">Pause</button>
+          <button id="reset-btn">Reset</button>
+        </div>
+        <p id="timer-status">Work Session</p>
+      </section>
 
-    <section class="tasks-section glass">
-      <h2>Today's Tasks</h2>
-      <div class="task-input">
-        <input type="text" id="task-input" placeholder="Add a new task...">
-        <button onclick="addTask()">Add Task</button>
-      </div>
-      <ul class="task-list" id="task-list"></ul>
-    </section>
+      <section class="tasks-section glass">
+        <h2>Today's Tasks</h2>
+        <div class="task-input">
+          <input type="text" id="task-input" placeholder="Add a new task...">
+          <button onclick="addTask()">Add Task</button>
+        </div>
+        <ul class="task-list" id="task-list"></ul>
+      </section>
+    </div>
   </div>
 
   <!-- Donation Modal -->

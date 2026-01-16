@@ -6,21 +6,24 @@ let sessionsCompleted = 0;
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
 
-// Initialize particles.js for background
+// Initialize particles.js for brain.fm-like glow orbs background
 particlesJS('particles-js', {
   particles: {
-    number: { value: 80, density: { enable: true, value_area: 800 } },
-    color: { value: '#ffffff' },
+    number: { value: 50, density: { enable: true, value_area: 800 } },
+    color: { value: '#4ecdc4' },
     shape: { type: 'circle' },
-    opacity: { value: 0.5, random: true },
-    size: { value: 3, random: true },
-    line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
-    move: { enable: true, speed: 2, direction: 'none', random: true, straight: false, out_mode: 'out' }
+    opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+    size: { value: 100, random: true, anim: { enable: true, speed: 2, size_min: 20, sync: false } },
+    line_linked: { enable: false },
+    move: { enable: true, speed: 1, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false, attract: { enable: false, rotateX: 600, rotateY: 1200 } }
   },
   interactivity: {
     detect_on: 'canvas',
-    events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } },
-    modes: { repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 } }
+    events: { onhover: { enable: true, mode: 'bubble' }, onclick: { enable: true, mode: 'repulse' }, resize: true },
+    modes: {
+      bubble: { distance: 200, size: 150, duration: 2, opacity: 0.8, speed: 3 },
+      repulse: { distance: 200, duration: 0.4 }
+    }
   },
   retina_detect: true
 });

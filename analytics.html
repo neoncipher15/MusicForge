@@ -9,7 +9,10 @@
 </head>
 <body>
   <div id="particles-js"></div>
-  <header class="glass">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button class="sidebar-toggle">☰</button>
     <h1>Productivity Hub</h1>
     <nav>
       <ul>
@@ -20,29 +23,32 @@
       </ul>
     </nav>
     <button class="donation-btn" onclick="openDonationModal()">Donate</button>
-  </header>
+  </div>
 
-  <div class="container">
-    <section class="analytics-section glass">
-      <h2>Analytics</h2>
-      <div class="stats">
-        <div class="stat-card">
-          <h3>Total Hours</h3>
-          <div class="stat-value" id="total-hours">0</div>
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <section class="analytics-section glass">
+        <h2>Analytics</h2>
+        <div class="stats">
+          <div class="stat-card">
+            <h3>Total Hours</h3>
+            <div class="stat-value" id="total-hours">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Sessions Completed</h3>
+            <div class="stat-value" id="sessions-completed">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Tasks Completed</h3>
+            <div class="stat-value" id="tasks-completed">0</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <h3>Sessions Completed</h3>
-          <div class="stat-value" id="sessions-completed">0</div>
+        <div class="chart-container">
+          <canvas id="taskChart"></canvas>
         </div>
-        <div class="stat-card">
-          <h3>Tasks Completed</h3>
-          <div class="stat-value" id="tasks-completed">0</div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="taskChart"></canvas>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 
   <!-- Donation Modal -->
