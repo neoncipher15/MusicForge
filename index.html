@@ -19,7 +19,7 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(160deg, #0a0a0f 0%, #0f0f18 50%, #050508 100%);
+            background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 40%, #E55A2B 70%, #F7931E 100%);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #ffffff;
             overflow-x: hidden;
@@ -33,9 +33,13 @@
         /* Sidebar */
         .sidebar {
             width: 280px;
-            background: rgba(255, 255, 255, 0.015);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(255, 255, 255, 0.03);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 8px 32px 0 rgba(255, 140, 66, 0.1),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
             padding: 2rem 1.5rem;
             display: flex;
             flex-direction: column;
@@ -275,9 +279,13 @@
         /* Tasks Panel */
         .tasks-panel {
             width: 100%;
-            background: rgba(255, 255, 255, 0.015);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 8px 32px 0 rgba(255, 140, 66, 0.1),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 1.5rem;
         }
@@ -467,8 +475,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -488,8 +497,13 @@
         }
 
         .modal {
-            background: #0c0c10;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 8px 32px 0 rgba(255, 140, 66, 0.15),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             padding: 2rem;
             width: 100%;
