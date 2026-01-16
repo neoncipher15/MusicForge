@@ -41,6 +41,7 @@
             left: 0;
             top: 0;
             height: 100vh;
+            z-index: 100;
         }
 
         .logo {
@@ -81,6 +82,7 @@
             font-weight: 400;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-decoration: none;
         }
 
         .nav-item:hover {
@@ -403,6 +405,101 @@
             font-size: 0.875rem;
         }
 
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal {
+            background: rgba(20, 20, 35, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .donate-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .donate-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .donate-text {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .donate-image {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 16px;
+            display: block;
+            margin: 0 auto 1rem;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .main-content {
@@ -460,18 +557,18 @@
                     <span class="icon">🏠</span>
                     <span>Home</span>
                 </div>
-                <div class="nav-item">
+                <a href="tasks.html" class="nav-item">
                     <span class="icon">☑️</span>
                     <span>Tasks</span>
-                </div>
-                <div class="nav-item">
+                </a>
+                <a href="planner.html" class="nav-item">
                     <span class="icon">📅</span>
                     <span>Calendar</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='analytics.html'">
+                </a>
+                <a href="analytics.html" class="nav-item">
                     <span class="icon">📊</span>
                     <span>Analytics</span>
-                </div>
+                </a>
             </nav>
             
             <div class="donate-link" onclick="openDonateModal()">
@@ -481,7 +578,7 @@
         </aside>
 
         <!-- Donate Modal -->
-        <div class="modal-overlay donate-modal" id="donateModal">
+        <div class="modal-overlay" id="donateModal">
             <div class="modal">
                 <div class="modal-header">
                     <button class="modal-close" onclick="closeDonateModal()">✕</button>
@@ -489,8 +586,7 @@
                 <div class="donate-icon">❤️</div>
                 <h2 class="donate-title">Support Focus Forge</h2>
                 <p class="donate-text">Your support helps us keep building amazing features!</p>
-                <img class="donate-image" src="image.png" alt="Donate" onerror="this.style.display='none'; document.getElementById('qrCode').style.display='block'">
-                <img id="qrCode" class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='white' width='200' height='200'/%3E%3Crect fill='black' x='10' y='10' width='50' height='50'/%3E%3Crect fill='black' x='70' y='10' width='50' height='50'/%3E%3Crect fill='black' x='140' y='10' width='50' height='50'/%3E%3Crect fill='black' x='10' y='70' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='50' height='50'/%3E%3Crect fill='black' x='140' y='70' width='50' height='50'/%3E%3Crect fill='black' x='10' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='140' width='50' height='50'/%3E%3Crect fill='black' x='140' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='10' height='10'/%3E%3C/svg%3E" style="display:none">
+                <img class="donate-image" src="image.png" alt="Donate QR Code" onerror="this.style.display='none'">
             </div>
         </div>
 
@@ -611,7 +707,6 @@
         function completeTimer() {
             pauseTimer();
             if (isSoundEnabled) {
-                // Play completion sound effect (visual feedback)
                 timerMinutesEl.style.color = '#8b5cf6';
                 setTimeout(() => {
                     timerMinutesEl.style.color = '';
@@ -680,10 +775,6 @@
             if (e.key === 'Enter') addTask();
         });
 
-        // Initialize
-        updateTimerDisplay();
-        renderTasks();
-
         // Modal functions
         function openDonateModal() {
             document.getElementById('donateModal').classList.add('active');
@@ -694,13 +785,22 @@
         }
 
         // Close modal on overlay click
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) {
-                    overlay.classList.remove('active');
-                }
-            });
+        document.getElementById('donateModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('donateModal')) {
+                closeDonateModal();
+            }
         });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDonateModal();
+            }
+        });
+
+        // Initialize
+        updateTimerDisplay();
+        renderTasks();
     </script>
 </body>
 </html>

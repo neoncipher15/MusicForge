@@ -41,6 +41,7 @@
             left: 0;
             top: 0;
             height: 100vh;
+            z-index: 100;
         }
 
         .logo {
@@ -81,6 +82,7 @@
             font-weight: 400;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-decoration: none;
         }
 
         .nav-item:hover {
@@ -129,7 +131,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
-            animation: fadeInDown 0.6s ease;
         }
 
         .page-title {
@@ -162,7 +163,6 @@
             display: flex;
             gap: 0.5rem;
             margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease 0.1s both;
         }
 
         .category-tab {
@@ -201,7 +201,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 1rem;
-            animation: fadeInUp 0.6s ease 0.2s both;
         }
 
         .task-card {
@@ -323,7 +322,7 @@
             margin-bottom: 1rem;
         }
 
-        /* Modal */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -347,21 +346,21 @@
             visibility: visible;
         }
 
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
         .modal {
             background: rgba(20, 20, 35, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 2rem;
             width: 100%;
             max-width: 480px;
             transform: scale(0.9);
             transition: all 0.3s ease;
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1);
         }
 
         .modal-header {
@@ -386,6 +385,9 @@
             font-size: 1.25rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-close:hover {
@@ -477,7 +479,7 @@
 
         /* Donate Modal */
         .donate-modal .modal {
-            max-width: 500px;
+            max-width: 450px;
             text-align: center;
         }
 
@@ -499,28 +501,10 @@
 
         .donate-image {
             width: 100%;
-            max-width: 400px;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        .donate-qr {
-            width: 200px;
-            height: 200px;
-            object-fit: contain;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        /* Animations */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            max-width: 280px;
+            border-radius: 16px;
+            display: block;
+            margin: 0 auto;
         }
 
         /* Responsive */
@@ -600,8 +584,7 @@
             <div class="donate-icon">❤️</div>
             <h2 class="donate-title">Support Focus Forge</h2>
             <p class="donate-text">Your support helps us keep building amazing features!</p>
-            <img class="donate-image" src="image.png" alt="Donate" onerror="this.style.display='none'; document.getElementById('qrCode').style.display='block'">
-            <img id="qrCode" class="donate-qr" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='white' width='200' height='200'/%3E%3Crect fill='black' x='10' y='10' width='50' height='50'/%3E%3Crect fill='black' x='70' y='10' width='50' height='50'/%3E%3Crect fill='black' x='140' y='10' width='50' height='50'/%3E%3Crect fill='black' x='10' y='70' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='50' height='50'/%3E%3Crect fill='black' x='140' y='70' width='50' height='50'/%3E%3Crect fill='black' x='10' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='140' width='50' height='50'/%3E%3Crect fill='black' x='140' y='140' width='50' height='50'/%3E%3Crect fill='black' x='70' y='70' width='10' height='10'/%3E%3C/svg%3E" style="display:none">
+            <img class="donate-image" src="image.png" alt="Donate QR Code" onerror="this.style.display='none'">
         </div>
     </div>
 
@@ -614,22 +597,22 @@
             </div>
             
             <nav class="nav-menu">
-                <div class="nav-item" onclick="window.location.href='index.html'">
+                <a href="index.html" class="nav-item">
                     <span class="icon">🏠</span>
                     <span>Home</span>
-                </div>
+                </a>
                 <div class="nav-item active">
                     <span class="icon">☑️</span>
                     <span>Tasks</span>
                 </div>
-                <div class="nav-item" onclick="window.location.href='planner.html'">
+                <a href="planner.html" class="nav-item">
                     <span class="icon">📅</span>
-                    <span>Planner</span>
-                </div>
-                <div class="nav-item" onclick="window.location.href='analytics.html'">
+                    <span>Calendar</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
                     <span class="icon">📊</span>
                     <span>Analytics</span>
-                </div>
+                </a>
             </nav>
             
             <div class="donate-link" onclick="openDonateModal()">
@@ -679,7 +662,6 @@
 
         function saveTasks() {
             localStorage.setItem('focusForgeTasks', JSON.stringify(tasks));
-            updateAnalytics();
         }
 
         function getCategoryLabel(category) {
@@ -722,28 +704,31 @@
                 return;
             }
 
-            grid.innerHTML = filteredTasks.map((task, index) => `
-                <div class="task-card">
-                    <div class="task-header">
-                        <h3 class="task-title">${escapeHtml(task.title)}</h3>
-                        <span class="task-status ${getCategoryClass(task.category)}">${getCategoryLabel(task.category)}</span>
-                    </div>
-                    ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
-                    <div class="task-meta">
-                        <div class="task-date">
-                            <span>📅</span>
-                            <span>${task.date ? formatDate(task.date) : 'No due date'}</span>
+            grid.innerHTML = filteredTasks.map((task) => {
+                const originalIndex = tasks.indexOf(task);
+                return `
+                    <div class="task-card">
+                        <div class="task-header">
+                            <h3 class="task-title">${escapeHtml(task.title)}</h3>
+                            <span class="task-status ${getCategoryClass(task.category)}">${getCategoryLabel(task.category)}</span>
                         </div>
-                        <div class="task-actions">
-                            ${task.category !== 'completed' ? `
-                                <button class="task-action-btn complete" onclick="completeTask(${tasks.indexOf(task)})" title="Complete">✓</button>
-                            ` : ''}
-                            <button class="task-action-btn" onclick="editTask(${tasks.indexOf(task)})" title="Edit">✏️</button>
-                            <button class="task-action-btn delete" onclick="deleteTask(${tasks.indexOf(task)})" title="Delete">✕</button>
+                        ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
+                        <div class="task-meta">
+                            <div class="task-date">
+                                <span>📅</span>
+                                <span>${task.date ? formatDate(task.date) : 'No due date'}</span>
+                            </div>
+                            <div class="task-actions">
+                                ${task.category !== 'completed' ? `
+                                    <button class="task-action-btn complete" onclick="completeTask(${originalIndex})" title="Complete">✓</button>
+                                ` : ''}
+                                <button class="task-action-btn" onclick="editTask(${originalIndex})" title="Edit">✏️</button>
+                                <button class="task-action-btn delete" onclick="deleteTask(${originalIndex})" title="Delete">✕</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function formatDate(dateStr) {
@@ -807,7 +792,6 @@
             document.getElementById('taskCategory').value = task.category;
             document.getElementById('taskDate').value = task.date;
             
-            // Remove old task and open modal
             tasks.splice(index, 1);
             saveTasks();
             openTaskModal();
@@ -838,13 +822,13 @@
             });
         });
 
-        // Update analytics
-        function updateAnalytics() {
-            const completedTasks = tasks.filter(t => t.category === 'completed').length;
-            const totalTasks = tasks.length;
-            localStorage.setItem('focusForgeTasksCompleted', completedTasks);
-            localStorage.setItem('focusForgeTotalTasks', totalTasks);
-        }
+        // Close modals on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTaskModal();
+                closeDonateModal();
+            }
+        });
 
         // Initialize
         renderTasks();
