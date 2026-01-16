@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -123,25 +124,24 @@
         .main-content {
             flex: 1;
             margin-left: 280px;
-            display: flex;
             padding: 3rem;
-            gap: 3rem;
-            align-items: flex-start;
-            justify-content: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
-        /* Timer Section */
+        /* Timer Section - Centered */
         .timer-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .timer-container {
             position: relative;
-            width: 320px;
-            height: 320px;
+            width: 280px;
+            height: 280px;
         }
 
         .timer-ring {
@@ -153,15 +153,15 @@
         .timer-ring-bg {
             fill: none;
             stroke: rgba(255, 255, 255, 0.05);
-            stroke-width: 8;
+            stroke-width: 6;
         }
 
         .timer-ring-progress {
             fill: none;
             stroke: url(#timerGradient);
-            stroke-width: 8;
+            stroke-width: 6;
             stroke-linecap: round;
-            stroke-dasharray: 1006;
+            stroke-dasharray: 880;
             stroke-dashoffset: 0;
             transition: stroke-dashoffset 0.5s ease;
         }
@@ -177,48 +177,68 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
-        .timer-minutes {
-            font-size: 5rem;
+        .timer-content:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .timer-time {
+            font-size: 4rem;
             font-weight: 300;
             line-height: 1;
-            margin-bottom: 0.25rem;
         }
 
         .timer-seconds {
-            font-size: 5rem;
-            font-weight: 300;
-            line-height: 1;
             color: rgba(255, 255, 255, 0.3);
         }
 
-        .timer-label {
-            font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.3);
-            margin-top: 0.5rem;
-            cursor: pointer;
-            transition: color 0.2s ease;
+        .timer-presets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .timer-label:hover {
+        .preset-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
             color: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .preset-btn.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
         }
 
         .timer-controls {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .control-btn {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
             color: rgba(255, 255, 255, 0.5);
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -232,13 +252,13 @@
         }
 
         .play-btn {
-            width: 80px;
-            height: 80px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -254,33 +274,46 @@
 
         /* Tasks Panel */
         .tasks-panel {
-            width: 380px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 24px;
+            border-radius: 20px;
             padding: 1.5rem;
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
 
         .tasks-title {
             font-size: 1.125rem;
             font-weight: 600;
-            margin-bottom: 1.25rem;
+        }
+
+        .tasks-count {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .task-input-container {
             display: flex;
             gap: 0.75rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
         }
 
         .task-input {
             flex: 1;
-            padding: 0.875rem 1rem;
+            padding: 0.75rem 1rem;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
             font-size: 0.9375rem;
             outline: none;
@@ -297,39 +330,36 @@
         }
 
         .add-task-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .add-task-btn:hover {
             background: rgba(255, 255, 255, 0.12);
-            transform: scale(1.05);
-        }
-
-        .add-task-btn:active {
-            transform: scale(0.95);
         }
 
         .tasks-list {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .task-item {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.875rem 1rem;
+            padding: 0.75rem 1rem;
             background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
+            border-radius: 10px;
             transition: all 0.2s ease;
         }
 
@@ -338,8 +368,8 @@
         }
 
         .task-checkbox {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
@@ -361,7 +391,7 @@
 
         .task-checkbox.checked::after {
             content: '✓';
-            font-size: 0.75rem;
+            font-size: 0.625rem;
             color: white;
         }
 
@@ -378,13 +408,13 @@
         }
 
         .task-delete {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.2);
-            font-size: 1rem;
+            font-size: 0.875rem;
             cursor: pointer;
             opacity: 0;
             transition: all 0.2s ease;
@@ -436,9 +466,9 @@
             background: #0d0d12;
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 24px;
-            padding: 2.5rem;
+            padding: 2rem;
             width: 100%;
-            max-width: 480px;
+            max-width: 400px;
             transform: scale(0.9);
             transition: all 0.3s ease;
         }
@@ -450,9 +480,14 @@
             margin-bottom: 1.5rem;
         }
 
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
         .modal-close {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.03);
             border: none;
@@ -470,14 +505,82 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
         .donate-icon {
-            font-size: 4rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
             text-align: center;
         }
 
         .donate-title {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
             text-align: center;
@@ -491,25 +594,13 @@
 
         .donate-image {
             width: 100%;
-            max-width: 300px;
+            max-width: 250px;
             border-radius: 16px;
             display: block;
             margin: 0 auto;
         }
 
         /* Responsive */
-        @media (max-width: 1200px) {
-            .main-content {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .tasks-panel {
-                width: 100%;
-                max-width: 400px;
-            }
-        }
-
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -526,7 +617,20 @@
             
             .main-content {
                 margin-left: 70px;
-                padding: 2rem 1rem;
+                padding: 1.5rem;
+            }
+
+            .timer-container {
+                width: 240px;
+                height: 240px;
+            }
+
+            .timer-time {
+                font-size: 3rem;
+            }
+
+            .tasks-panel {
+                max-width: 100%;
             }
         }
     </style>
@@ -574,6 +678,26 @@
             </div>
         </aside>
 
+        <!-- Custom Timer Modal -->
+        <div class="modal-overlay" id="timerModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Set Timer</h2>
+                    <button class="modal-close" onclick="closeTimerModal()">✕</button>
+                </div>
+                <form id="timerForm">
+                    <div class="form-group">
+                        <label class="form-label">Minutes</label>
+                        <input type="number" class="form-input" id="customMinutes" min="1" max="120" value="25" placeholder="Enter minutes">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeTimerModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Set Timer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Donate Modal -->
         <div class="modal-overlay" id="donateModal">
             <div class="modal">
@@ -589,19 +713,27 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Timer Section -->
+            <!-- Timer Section - Centered -->
             <div class="timer-section">
                 <div class="timer-container">
-                    <svg class="timer-ring" viewBox="0 0 320 320">
-                        <circle class="timer-ring-bg" cx="160" cy="160" r="150"/>
-                        <circle class="timer-ring-progress" id="timerProgress" cx="160" cy="160" r="150"/>
-                        <circle class="timer-ring-dot" id="timerDot" cx="160" cy="10" r="6"/>
+                    <svg class="timer-ring" viewBox="0 0 280 280">
+                        <circle class="timer-ring-bg" cx="140" cy="140" r="132"/>
+                        <circle class="timer-ring-progress" id="timerProgress" cx="140" cy="140" r="132"/>
+                        <circle class="timer-ring-dot" id="timerDot" cx="140" cy="8" r="5"/>
                     </svg>
-                    <div class="timer-content">
-                        <div class="timer-minutes" id="timerMinutes">25</div>
-                        <div class="timer-seconds" id="timerSeconds">00</div>
-                        <div class="timer-label">Click time to customize</div>
+                    <div class="timer-content" onclick="openTimerModal()">
+                        <div class="timer-time">
+                            <span id="timerMinutes">15</span><span class="timer-seconds" id="timerSeconds">:00</span>
+                        </div>
                     </div>
+                </div>
+                
+                <div class="timer-presets">
+                    <button class="preset-btn" data-minutes="5">5 min</button>
+                    <button class="preset-btn active" data-minutes="15">15 min</button>
+                    <button class="preset-btn" data-minutes="25">25 min</button>
+                    <button class="preset-btn" data-minutes="45">45 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
                 </div>
                 
                 <div class="timer-controls">
@@ -613,7 +745,10 @@
 
             <!-- Tasks Panel -->
             <div class="tasks-panel">
-                <h2 class="tasks-title">Today's Tasks</h2>
+                <div class="tasks-header">
+                    <h2 class="tasks-title">Today's Tasks</h2>
+                    <span class="tasks-count" id="tasksCount">0 tasks</span>
+                </div>
                 <div class="task-input-container">
                     <input type="text" class="task-input" id="taskInput" placeholder="Add a new task...">
                     <button class="add-task-btn" id="addTaskBtn">+</button>
@@ -626,10 +761,59 @@
     </div>
 
     <script>
+        // Audio context for sound
+        let audioContext = null;
+
+        function playCompletionSound() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const now = audioContext.currentTime;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(587.33, now);
+                oscillator.frequency.setValueAtTime(880, now + 0.15);
+                oscillator.frequency.setValueAtTime(1174.66, now + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                
+                oscillator.start(now);
+                oscillator.stop(now + 0.6);
+                
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode2 = audioContext.createGain();
+                
+                oscillator2.connect(gainNode2);
+                gainNode2.connect(audioContext.destination);
+                
+                oscillator2.type = 'sine';
+                oscillator2.frequency.setValueAtTime(1046.50, now + 0.4);
+                oscillator2.frequency.setValueAtTime(1318.51, now + 0.55);
+                
+                gainNode2.gain.setValueAtTime(0.3, now + 0.4);
+                gainNode2.gain.exponentialRampToValueAtTime(0.01, now + 1);
+                
+                oscillator2.start(now + 0.4);
+                oscillator2.stop(now + 1);
+                
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
         // Timer State
-        let timerMinutes = 25;
+        let timerMinutes = 15;
         let timerSeconds = 0;
-        let totalSeconds = 25 * 60;
+        let totalSeconds = 15 * 60;
         let currentSeconds = 0;
         let isRunning = false;
         let timerInterval = null;
@@ -646,21 +830,20 @@
         const taskInput = document.getElementById('taskInput');
         const addTaskBtn = document.getElementById('addTaskBtn');
         const tasksList = document.getElementById('tasksList');
+        const tasksCount = document.getElementById('tasksCount');
 
-        // Initialize timer ring
         function updateTimerDisplay() {
             timerMinutesEl.textContent = timerMinutes.toString().padStart(2, '0');
-            timerSecondsEl.textContent = timerSeconds.toString().padStart(2, '0');
+            timerSecondsEl.textContent = ':' + timerSeconds.toString().padStart(2, '0');
             
             const progress = currentSeconds / totalSeconds;
-            const circumference = 2 * Math.PI * 150;
+            const circumference = 2 * Math.PI * 132;
             const offset = circumference * progress;
             timerProgress.style.strokeDashoffset = offset;
             
-            // Update dot position
             const angle = (progress * 2 * Math.PI) - Math.PI / 2;
-            const dotX = 160 + 150 * Math.cos(angle);
-            const dotY = 160 + 150 * Math.sin(angle);
+            const dotX = 140 + 132 * Math.cos(angle);
+            const dotY = 140 + 132 * Math.sin(angle);
             timerDot.setAttribute('cx', dotX);
             timerDot.setAttribute('cy', dotY);
         }
@@ -696,23 +879,40 @@
         function resetTimer() {
             pauseTimer();
             currentSeconds = 0;
-            timerMinutes = 25;
-            timerSeconds = 0;
+            timerSeconds = Math.floor(totalSeconds % 60);
+            timerMinutes = Math.floor(totalSeconds / 60);
             updateTimerDisplay();
+        }
+
+        function setTimer(minutes) {
+            pauseTimer();
+            timerMinutes = minutes;
+            timerSeconds = 0;
+            totalSeconds = minutes * 60;
+            currentSeconds = 0;
+            updateTimerDisplay();
+            
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.minutes) === minutes);
+            });
         }
 
         function completeTimer() {
             pauseTimer();
+            
             if (isSoundEnabled) {
-                timerMinutesEl.style.color = 'rgba(255, 255, 255, 0.7)';
-                setTimeout(() => {
-                    timerMinutesEl.style.color = '';
-                }, 2000);
+                playCompletionSound();
             }
-            currentSeconds = 0;
-            timerMinutes = 25;
-            timerSeconds = 0;
-            updateTimerDisplay();
+            
+            timerMinutesEl.textContent = 'Done!';
+            timerSecondsEl.textContent = '';
+            
+            setTimeout(() => {
+                currentSeconds = 0;
+                timerSeconds = Math.floor(totalSeconds % 60);
+                timerMinutes = Math.floor(totalSeconds / 60);
+                updateTimerDisplay();
+            }, 3000);
         }
 
         function toggleSound() {
@@ -724,6 +924,9 @@
         let tasks = [];
 
         function renderTasks() {
+            const pendingTasks = tasks.filter(t => !t.completed);
+            tasksCount.textContent = `${pendingTasks.length} task${pendingTasks.length !== 1 ? 's' : ''}`;
+            
             if (tasks.length === 0) {
                 tasksList.innerHTML = '<div class="empty-tasks">No tasks yet. Add one above!</div>';
                 return;
@@ -763,6 +966,25 @@
             renderTasks();
         }
 
+        // Timer Modal functions
+        function openTimerModal() {
+            document.getElementById('timerModal').classList.add('active');
+            document.getElementById('customMinutes').value = timerMinutes;
+        }
+
+        function closeTimerModal() {
+            document.getElementById('timerModal').classList.remove('active');
+        }
+
+        // Donate Modal functions
+        function openDonateModal() {
+            document.getElementById('donateModal').classList.add('active');
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('active');
+        }
+
         // Event Listeners
         playBtn.addEventListener('click', startTimer);
         resetBtn.addEventListener('click', resetTimer);
@@ -772,30 +994,38 @@
             if (e.key === 'Enter') addTask();
         });
 
-        // Modal functions
-        function openDonateModal() {
-            document.getElementById('donateModal').classList.add('active');
-        }
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setTimer(parseInt(btn.dataset.minutes));
+            });
+        });
 
-        function closeDonateModal() {
-            document.getElementById('donateModal').classList.remove('active');
-        }
-
-        // Close modal on overlay click
-        document.getElementById('donateModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('donateModal')) {
-                closeDonateModal();
+        document.getElementById('timerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const minutes = parseInt(document.getElementById('customMinutes').value);
+            if (minutes > 0 && minutes <= 120) {
+                setTimer(minutes);
+                closeTimerModal();
             }
         });
 
-        // Close modal on Escape key
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                closeTimerModal();
                 closeDonateModal();
             }
         });
 
         // Initialize
+        totalSeconds = timerMinutes * 60;
         updateTimerDisplay();
         renderTasks();
     </script>
