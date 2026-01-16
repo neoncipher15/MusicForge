@@ -749,6 +749,26 @@
             </div>
         </div>
 
+        <!-- Break Modal -->
+        <div class="modal-overlay" id="breakModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Set Break Duration</h2>
+                    <button class="modal-close" onclick="closeBreakModal()">✕</button>
+                </div>
+                <form id="breakForm">
+                    <div class="form-group">
+                        <label class="form-label">Break Minutes</label>
+                        <input type="number" class="form-input" id="breakMinutes" min="1" max="30" value="5" placeholder="Enter break minutes">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeBreakModal()">Skip</button>
+                        <button type="submit" class="btn btn-primary">Start Break</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <main class="main-content">
             <!-- Timer Section -->
@@ -883,17 +903,33 @@
             isRunning = true;
             playBtn.textContent = '⏸';
             
-            timerInterval = setInterval(() => {
-                if (currentSeconds >= totalSeconds) {
-                    completeTimer();
-                    return;
-                }
-                
-                currentSeconds++;
-                timerSeconds = Math.floor((totalSeconds - currentSeconds) % 60);
-                timerMinutes = Math.floor((totalSeconds - currentSeconds) / 60);
-                updateTimerDisplay();
-            }, 1000);
+            if (isBreakMode) {
+                // Break mode timer
+                timerInterval = setInterval(() => {
+                    if (breakCurrentSeconds >= breakTotalSeconds) {
+                        completeTimer();
+                        return;
+                    }
+                    
+                    breakCurrentSeconds++;
+                    breakSeconds = Math.floor((breakTotalSeconds - breakCurrentSeconds) % 60);
+                    breakMinutes = Math.floor((breakTotalSeconds - breakCurrentSeconds) / 60);
+                    updateBreakTimerDisplay();
+                }, 1000);
+            } else {
+                // Focus mode timer
+                timerInterval = setInterval(() => {
+                    if (currentSeconds >= totalSeconds) {
+                        completeTimer();
+                        return;
+                    }
+                    
+                    currentSeconds++;
+                    timerSeconds = Math.floor((totalSeconds - currentSeconds) % 60);
+                    timerMinutes = Math.floor((totalSeconds - currentSeconds) / 60);
+                    updateTimerDisplay();
+                }, 1000);
+            }
         }
 
         function pauseTimer() {
@@ -904,10 +940,17 @@
 
         function resetTimer() {
             pauseTimer();
-            currentSeconds = 0;
-            timerSeconds = Math.floor(totalSeconds % 60);
-            timerMinutes = Math.floor(totalSeconds / 60);
-            updateTimerDisplay();
+            if (isBreakMode) {
+                breakCurrentSeconds = 0;
+                breakSeconds = Math.floor(breakTotalSeconds % 60);
+                breakMinutes = Math.floor(breakTotalSeconds / 60);
+                updateBreakTimerDisplay();
+            } else {
+                currentSeconds = 0;
+                timerSeconds = Math.floor(totalSeconds % 60);
+                timerMinutes = Math.floor(totalSeconds / 60);
+                updateTimerDisplay();
+            }
         }
 
         function setTimer(minutes) {
@@ -930,16 +973,133 @@
                 playCompletionSound();
             }
             
-            timerMinutesEl.textContent = 'Done';
+            // Save focus session to localStorage (only for focus mode, not break)
+            if (!isBreakMode) {
+                const focusDuration = totalSeconds;
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Save total focus time
+                let totalFocusTime = JSON.parse(localStorage.getItem('focusForgeTotalTime')) || 0;
+                totalFocusTime += focusDuration;
+                localStorage.setItem('focusForgeTotalTime', JSON.stringify(totalFocusTime));
+                
+                // Save session record
+                let focusSessions = JSON.parse(localStorage.getItem('focusForgeSessions')) || [];
+                focusSessions.push({
+                    date: today,
+                    duration: focusDuration,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('focusForgeSessions', JSON.stringify(focusSessions));
+            }
+            
+            timerMinutesEl.textContent = isBreakMode ? 'Break Done!' : 'Session Done!';
             timerSecondsEl.textContent = '';
             timerProgress.style.strokeDashoffset = 0;
             
             setTimeout(() => {
-                currentSeconds = 0;
-                timerSeconds = Math.floor(totalSeconds % 60);
-                timerMinutes = Math.floor(totalSeconds / 60);
-                updateTimerDisplay();
+                if (isBreakMode) {
+                    // Break is over, reset to focus mode
+                    isBreakMode = false;
+                    breakMinutes = 5;
+                    breakSeconds = 0;
+                    breakTotalSeconds = 5 * 60;
+                    breakCurrentSeconds = 0;
+                    timerMinutes = 15;
+                    timerSeconds = 0;
+                    totalSeconds = 15 * 60;
+                    currentSeconds = 0;
+                    updateTimerDisplay();
+                    updatePresetButtons();
+                } else {
+                    // Start break mode
+                    startBreakMode();
+                }
             }, 2500);
+        }
+
+        function startBreakMode() {
+            isBreakMode = true;
+            breakMinutes = 5;
+            breakSeconds = 0;
+            breakTotalSeconds = 5 * 60;
+            breakCurrentSeconds = 0;
+            updateBreakTimerDisplay();
+            openBreakModal();
+        }
+
+        function updateBreakTimerDisplay() {
+            timerMinutesEl.textContent = breakMinutes.toString().padStart(2, '0');
+            timerSecondsEl.textContent = ':' + breakSeconds.toString().padStart(2, '0');
+            
+            const progress = breakCurrentSeconds / breakTotalSeconds;
+            const circumference = 2 * Math.PI * 120;
+            const offset = circumference * (1 - progress);
+            timerProgress.style.strokeDashoffset = offset;
+            
+            const angle = (progress * 2 * Math.PI) - Math.PI / 2;
+            const dotX = 130 + 120 * Math.cos(angle);
+            const dotY = 130 + 120 * Math.sin(angle);
+            timerDot.setAttribute('cx', dotX);
+            timerDot.setAttribute('cy', dotY);
+        }
+
+        function startBreakTimer() {
+            if (isRunning) {
+                pauseTimer();
+                return;
+            }
+            
+            isRunning = true;
+            playBtn.textContent = '⏸';
+            
+            timerInterval = setInterval(() => {
+                if (breakCurrentSeconds >= breakTotalSeconds) {
+                    completeTimer();
+                    return;
+                }
+                
+                breakCurrentSeconds++;
+                breakSeconds = Math.floor((breakTotalSeconds - breakCurrentSeconds) % 60);
+                breakMinutes = Math.floor((breakTotalSeconds - breakCurrentSeconds) / 60);
+                updateBreakTimerDisplay();
+            }, 1000);
+        }
+
+        function resetBreakTimer() {
+            pauseTimer();
+            breakCurrentSeconds = 0;
+            breakSeconds = Math.floor(breakTotalSeconds % 60);
+            breakMinutes = Math.floor(breakTotalSeconds / 60);
+            updateBreakTimerDisplay();
+        }
+
+        function setBreakTimer(minutes) {
+            pauseTimer();
+            breakMinutes = minutes;
+            breakSeconds = 0;
+            breakTotalSeconds = minutes * 60;
+            breakCurrentSeconds = 0;
+            updateBreakTimerDisplay();
+            
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.minutes) === minutes);
+            });
+        }
+
+        function openBreakModal() {
+            document.getElementById('breakModal').classList.add('active');
+            document.getElementById('breakMinutes').value = breakMinutes;
+        }
+
+        function closeBreakModal() {
+            document.getElementById('breakModal').classList.remove('active');
+        }
+
+        function updatePresetButtons() {
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.minutes) === timerMinutes);
+            });
         }
 
         function toggleSound() {
@@ -1031,7 +1191,11 @@
             e.preventDefault();
             const minutes = parseInt(document.getElementById('customMinutes').value);
             if (minutes > 0 && minutes <= 120) {
-                setTimer(minutes);
+                if (isBreakMode) {
+                    setBreakTimer(minutes);
+                } else {
+                    setTimer(minutes);
+                }
                 closeTimerModal();
             }
         });
@@ -1048,6 +1212,18 @@
             if (e.key === 'Escape') {
                 closeTimerModal();
                 closeDonateModal();
+                closeBreakModal();
+            }
+        });
+
+        // Break form event listener
+        document.getElementById('breakForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const minutes = parseInt(document.getElementById('breakMinutes').value);
+            if (minutes > 0 && minutes <= 30) {
+                setBreakTimer(minutes);
+                closeBreakModal();
+                startTimer();
             }
         });
 
