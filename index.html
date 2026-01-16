@@ -128,7 +128,7 @@
             padding: 3.5rem 3rem;
             display: flex;
             flex-direction: column;
-            gap: 2.5rem;
+            gap: 4rem;
             max-width: 900px;
         }
 
@@ -278,6 +278,12 @@
 
         .play-btn:active {
             transform: scale(0.95);
+        }
+
+        .timer-hint {
+            font-size: 0.8125rem;
+            color: rgba(255, 255, 255, 0.25);
+            margin-top: 0.5rem;
         }
 
         /* Tasks Panel */
@@ -764,22 +770,10 @@
                     <button class="play-btn" id="playBtn" title="Play/Pause">▶</button>
                     <button class="control-btn" id="resetBtn" title="Reset">↺</button>
                 </div>
+                
+                <div class="timer-hint">Click timer to customize</div>
             </div>
-
-            <!-- Tasks Panel -->
-            <div class="tasks-panel">
-                <div class="tasks-header">
-                    <h2 class="tasks-title">Today's Tasks</h2>
-                    <span class="tasks-count" id="tasksCount">0 remaining</span>
-                </div>
-                <div class="task-input-container">
-                    <input type="text" class="task-input" id="taskInput" placeholder="Add a new task...">
-                    <button class="add-task-btn" id="addTaskBtn">+</button>
-                </div>
-                <div class="tasks-list" id="tasksList">
-                    <div class="empty-tasks">No tasks yet. Add one above!</div>
-                </div>
-            </div>
+           
         </main>
     </div>
 
