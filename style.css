@@ -1,4 +1,4 @@
-/* Focus Forge - Main Styles */
+ /* Focus Forge - Main Styles */
 
 /* Font Import */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
@@ -11,7 +11,7 @@
 
 body {
     min-height: 100vh;
-    background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 40%, #E55A2B 70%, #F7931E 100%);
+    background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #050508 100%);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: #ffffff;
     overflow-x: hidden;
@@ -25,13 +25,13 @@ body {
 /* Sidebar */
 .sidebar {
     width: 280px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 
-        0 8px 32px 0 rgba(255, 140, 66, 0.1),
-        inset 0 0 20px rgba(255, 255, 255, 0.05);
+        0 8px 32px 0 rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(255, 140, 66, 0.03);
     padding: 2rem 1.5rem;
     display: flex;
     flex-direction: column;
@@ -203,13 +203,13 @@ body {
 }
 
 .task-card {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.03);
     box-shadow: 
-        0 8px 32px 0 rgba(255, 140, 66, 0.08),
-        inset 0 0 20px rgba(255, 255, 255, 0.03);
+        0 8px 32px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 20px rgba(255, 140, 66, 0.02);
     border-radius: 16px;
     padding: 1.25rem;
     transition: all 0.3s ease;
@@ -331,9 +331,9 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -353,13 +353,13 @@ body {
 }
 
 .modal {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(20, 20, 25, 0.95);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 
-        0 8px 32px 0 rgba(255, 140, 66, 0.15),
-        inset 0 0 20px rgba(255, 255, 255, 0.05);
+        0 8px 32px 0 rgba(0, 0, 0, 0.4),
+        inset 0 0 20px rgba(255, 140, 66, 0.03);
     border-radius: 24px;
     padding: 2rem;
     width: 100%;
