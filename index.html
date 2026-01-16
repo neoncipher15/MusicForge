@@ -16,7 +16,7 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a1a3e 0%, #0d0d2e 50%, #000010 100%);
+            background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #050508 100%);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #ffffff;
             overflow-x: hidden;
@@ -30,10 +30,10 @@
         /* Sidebar */
         .sidebar {
             width: 280px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.03);
             padding: 2rem 1.5rem;
             display: flex;
             flex-direction: column;
@@ -56,12 +56,13 @@
         .logo-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            background: linear-gradient(135deg, #2a2a35, #1a1a22);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .nav-menu {
@@ -77,7 +78,7 @@
             gap: 0.875rem;
             padding: 0.875rem 1rem;
             border-radius: 12px;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.9375rem;
             font-weight: 400;
             cursor: pointer;
@@ -86,13 +87,13 @@
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .nav-item.active {
-            background: rgba(139, 92, 246, 0.15);
-            color: #a78bfa;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
         }
 
         .nav-item .icon {
@@ -105,7 +106,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
             font-size: 0.9375rem;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -114,8 +115,8 @@
         }
 
         .donate-link:hover {
-            color: #f472b6;
-            background: rgba(244, 114, 182, 0.1);
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
         }
 
         /* Main Content */
@@ -166,8 +167,8 @@
         }
 
         .timer-ring-dot {
-            fill: #8b5cf6;
-            filter: drop-shadow(0 0 6px #8b5cf6);
+            fill: #ffffff;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
         }
 
         .timer-content {
@@ -189,19 +190,19 @@
             font-size: 5rem;
             font-weight: 300;
             line-height: 1;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .timer-label {
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
             margin-top: 0.5rem;
             cursor: pointer;
             transition: color 0.2s ease;
         }
 
         .timer-label:hover {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .timer-controls {
@@ -214,9 +215,9 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 1.25rem;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -226,26 +227,25 @@
         }
 
         .control-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .play-btn {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
-            border: none;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1.75rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 30px rgba(139, 92, 246, 0.3);
         }
 
         .play-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
             transform: scale(1.05);
-            box-shadow: 0 6px 40px rgba(139, 92, 246, 0.4);
         }
 
         .play-btn:active {
@@ -255,10 +255,10 @@
         /* Tasks Panel */
         .tasks-panel {
             width: 380px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.03);
             border-radius: 24px;
             padding: 1.5rem;
         }
@@ -278,8 +278,8 @@
         .task-input {
             flex: 1;
             padding: 0.875rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             color: white;
             font-size: 0.9375rem;
@@ -288,20 +288,20 @@
         }
 
         .task-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .task-input:focus {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .add-task-btn {
             width: 48px;
             height: 48px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
-            border: none;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
@@ -309,6 +309,7 @@
         }
 
         .add-task-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
             transform: scale(1.05);
         }
 
@@ -327,13 +328,13 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.875rem 1rem;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 12px;
             transition: all 0.2s ease;
         }
 
         .task-item:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .task-checkbox {
@@ -350,11 +351,11 @@
         }
 
         .task-checkbox:hover {
-            border-color: #8b5cf6;
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
         .task-checkbox.checked {
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            background: rgba(255, 255, 255, 0.2);
             border-color: transparent;
         }
 
@@ -367,13 +368,13 @@
         .task-text {
             flex: 1;
             font-size: 0.9375rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.8);
             transition: all 0.2s ease;
         }
 
         .task-text.completed {
             text-decoration: line-through;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .task-delete {
@@ -382,7 +383,7 @@
             border-radius: 8px;
             background: transparent;
             border: none;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.2);
             font-size: 1rem;
             cursor: pointer;
             opacity: 0;
@@ -394,14 +395,14 @@
         }
 
         .task-delete:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .empty-tasks {
             text-align: center;
             padding: 2rem;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.2);
             font-size: 0.875rem;
         }
 
@@ -412,9 +413,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -434,10 +433,8 @@
         }
 
         .modal {
-            background: rgba(20, 20, 35, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0d0d12;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 24px;
             padding: 2.5rem;
             width: 100%;
@@ -457,9 +454,9 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border: none;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 1.25rem;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -469,8 +466,8 @@
         }
 
         .modal-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .donate-icon {
@@ -487,7 +484,7 @@
         }
 
         .donate-text {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             margin-bottom: 1.5rem;
             text-align: center;
         }
@@ -497,7 +494,7 @@
             max-width: 300px;
             border-radius: 16px;
             display: block;
-            margin: 0 auto 1rem;
+            margin: 0 auto;
         }
 
         /* Responsive */
@@ -538,8 +535,8 @@
     <svg style="display: none;">
         <defs>
             <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#8b5cf6"/>
-                <stop offset="100%" stop-color="#6366f1"/>
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#cccccc"/>
             </linearGradient>
         </defs>
     </svg>
@@ -707,7 +704,7 @@
         function completeTimer() {
             pauseTimer();
             if (isSoundEnabled) {
-                timerMinutesEl.style.color = '#8b5cf6';
+                timerMinutesEl.style.color = 'rgba(255, 255, 255, 0.7)';
                 setTimeout(() => {
                     timerMinutesEl.style.color = '';
                 }, 2000);
