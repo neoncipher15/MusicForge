@@ -294,6 +294,15 @@
             margin-top: 0.5rem;
         }
 
+        .timer-complete-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         /* Tasks Panel */
         .tasks-panel {
             width: 100%;
@@ -803,20 +812,7 @@
                 <div class="timer-hint">Click timer to customize</div>
             </div>
 
-            <!-- Tasks Panel -->
-            <div class="tasks-panel">
-                <div class="tasks-header">
-                    <h2 class="tasks-title">Today's Tasks</h2>
-                    <span class="tasks-count" id="tasksCount">0 remaining</span>
-                </div>
-                <div class="task-input-container">
-                    <input type="text" class="task-input" id="taskInput" placeholder="Add a new task...">
-                    <button class="add-task-btn" id="addTaskBtn">+</button>
-                </div>
-                <div class="tasks-list" id="tasksList">
-                    <div class="empty-tasks">No tasks yet. Add one above!</div>
-                </div>
-            </div>
+            
         </main>
     </div>
 
@@ -1014,8 +1010,8 @@
                 localStorage.setItem('focusForgeSessions', JSON.stringify(focusSessions));
             }
             
-            timerMinutesEl.textContent = isBreakMode ? 'Break Done!' : 'Session Done!';
-            timerSecondsEl.textContent = '';
+            timerMinutesEl.innerHTML = `<span class="timer-complete-text">${isBreakMode ? 'Break Done!' : 'Session Done!'}</span>`;
+            timerSecondsEl.style.visibility = 'hidden';
             timerProgress.style.strokeDashoffset = 0;
             
             setTimeout(() => {
@@ -1030,6 +1026,7 @@
                     timerSeconds = 0;
                     totalSeconds = 15 * 60;
                     currentSeconds = 0;
+                    timerSecondsEl.style.visibility = 'visible';
                     updateTimerDisplay();
                     updatePresetButtons();
                 } else {
