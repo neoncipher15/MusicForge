@@ -153,6 +153,84 @@
             justify-content: center;
         }
 
+        .timer-bg-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 100, 150, 0.3), transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(100, 150, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(255, 200, 100, 0.2), transparent 70%);
+            animation: animeGlow 4s ease-in-out infinite alternate;
+            z-index: -1;
+            filter: blur(20px);
+        }
+
+        @keyframes animeGlow {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(-5deg);
+                opacity: 0.9;
+            }
+        }
+
+        .timer-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; background: #ff9a9e; }
+        .particle:nth-child(2) { top: 60%; left: 70%; animation-delay: 0.5s; background: #a18cd1; }
+        .particle:nth-child(3) { top: 30%; left: 80%; animation-delay: 1s; background: #fbc2eb; }
+        .particle:nth-child(4) { top: 70%; left: 20%; animation-delay: 1.5s; background: #8fd3f4; }
+        .particle:nth-child(5) { top: 40%; left: 50%; animation-delay: 2s; background: #ffecd2; }
+        .particle:nth-child(6) { top: 80%; left: 40%; animation-delay: 2.5s; background: #fcb69f; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+        }
+
+        .timer-border-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: borderRotate 3s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes borderRotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
         .timer-ring {
             width: 100%;
             height: 100%;
@@ -764,6 +842,16 @@
             <!-- Timer Section -->
             <div class="timer-section">
                 <div class="timer-container">
+                    <div class="timer-bg-animation"></div>
+                    <div class="timer-border-glow"></div>
+                    <div class="timer-particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
                     <svg class="timer-ring" viewBox="0 0 320 320">
                         <circle class="timer-ring-bg" cx="160" cy="160" r="150"/>
                         <circle class="timer-ring-progress" id="timerProgress" cx="160" cy="160" r="150"/>
