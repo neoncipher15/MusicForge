@@ -1162,22 +1162,9 @@
             if (e.key === 'Enter') addTask();
         });
 
-        const timerForm = document.getElementById('timerForm');
-        const setTimerBtn = timerForm.querySelector('button[type="submit"]');
-
-        // Handle form submission
-        timerForm.addEventListener('submit', (e) => {
+        // Timer form submission handler
+        document.getElementById('timerForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            applyTimer();
-        });
-
-        // Also handle button click directly
-        setTimerBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            applyTimer();
-        });
-
-        function applyTimer() {
             const minutes = parseInt(document.getElementById('customMinutes').value);
             if (minutes > 0) {
                 if (isBreakMode) {
@@ -1187,7 +1174,7 @@
                 }
                 closeTimerModal();
             }
-        }
+        });
 
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
