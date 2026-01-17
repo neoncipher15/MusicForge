@@ -716,7 +716,7 @@
                 <form id="timerForm">
                     <div class="form-group">
                         <label class="form-label">Minutes</label>
-                        <input type="number" class="form-input" id="customMinutes" min="1" max="120" value="25" placeholder="Enter minutes">
+<input type="number" class="form-input" id="customMinutes" min="1" value="25" placeholder="Enter minutes">
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeTimerModal()">Cancel</button>
@@ -1162,7 +1162,7 @@
         document.getElementById('timerForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const minutes = parseInt(document.getElementById('customMinutes').value);
-            if (minutes > 0 && minutes <= 120) {
+            if (minutes > 0) {
                 if (isBreakMode) {
                     setBreakTimer(minutes);
                 } else {
