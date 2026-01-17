@@ -865,10 +865,10 @@
         const playBtn = document.getElementById('playBtn');
         const resetBtn = document.getElementById('resetBtn');
         const soundBtn = document.getElementById('soundBtn');
-        const taskInput = document.getElementById('taskInput');
-        const addTaskBtn = document.getElementById('addTaskBtn');
-        const tasksList = document.getElementById('tasksList');
-        const tasksCount = document.getElementById('tasksCount');
+        const taskInput = document.getElementById('taskInput') || null;
+        const addTaskBtn = document.getElementById('addTaskBtn') || null;
+        const tasksList = document.getElementById('tasksList') || null;
+        const tasksCount = document.getElementById('tasksCount') || null;
 
         function updateTimerDisplay() {
             timerMinutesEl.textContent = timerMinutes.toString().padStart(2, '0');
@@ -1089,6 +1089,8 @@
         let tasks = [];
 
         function renderTasks() {
+            if (!tasksList || !tasksCount) return;
+            
             const pendingTasks = tasks.filter(t => !t.completed);
             tasksCount.textContent = `${pendingTasks.length} remaining`;
             
@@ -1113,6 +1115,7 @@
         }
 
         function addTask() {
+            if (!taskInput) return;
             const text = taskInput.value.trim();
             if (text) {
                 tasks.push({ text, completed: false });
@@ -1154,8 +1157,8 @@
         playBtn.addEventListener('click', startTimer);
         resetBtn.addEventListener('click', resetTimer);
         soundBtn.addEventListener('click', toggleSound);
-        addTaskBtn.addEventListener('click', addTask);
-        taskInput.addEventListener('keypress', (e) => {
+        if (addTaskBtn) addTaskBtn.addEventListener('click', addTask);
+        if (taskInput) taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTask();
         });
 
