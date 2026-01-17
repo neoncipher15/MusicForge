@@ -720,7 +720,7 @@
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeTimerModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Set Timer</button>
+                        <button type="button" class="btn btn-primary" id="setTimerBtn">Set Timer</button>
                     </div>
                 </form>
             </div>
@@ -1162,9 +1162,8 @@
             if (e.key === 'Enter') addTask();
         });
 
-        // Timer form submission handler
-        document.getElementById('timerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Timer button click handler
+        document.getElementById('setTimerBtn').addEventListener('click', function() {
             const minutes = parseInt(document.getElementById('customMinutes').value);
             if (minutes > 0) {
                 if (isBreakMode) {
