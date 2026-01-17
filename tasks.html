@@ -30,17 +30,19 @@
 
         /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: rgba(255, 255, 255, 0.03);
+            width: 70px;
+            background: #0a0a0f;
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 
                 0 8px 32px 0 rgba(0, 0, 0, 0.3),
                 inset 0 0 20px rgba(255, 140, 66, 0.03);
-            padding: 2rem 1.5rem;
+            padding: 1.5rem 0.75rem;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
             position: fixed;
             left: 0;
             top: 0;
@@ -49,24 +51,20 @@
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 3rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            display: none;
         }
 
         .logo-icon {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
             background: linear-gradient(135deg, #2a2a35, #1a1a22);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
         }
 
         .nav-menu {
@@ -74,20 +72,21 @@
             flex-direction: column;
             gap: 0.5rem;
             flex: 1;
+            width: 100%;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 0.875rem;
-            padding: 0.875rem 1rem;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
             color: #ffffff;
-            font-size: 0.9375rem;
-            font-weight: 400;
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
+            margin: 0 auto;
         }
 
         .nav-item:hover {
@@ -99,21 +98,21 @@
         }
 
         .nav-item .icon {
-            font-size: 1.25rem;
-            width: 24px;
-            text-align: center;
+            font-size: 1.4rem;
         }
 
         .donate-link {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             color: #ffffff;
-            font-size: 0.9375rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            padding: 0.5rem;
-            border-radius: 8px;
+            margin-top: auto;
+            margin: 0 auto;
         }
 
         .donate-link:hover {
@@ -123,7 +122,7 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-left: 280px;
+            margin-left: 70px;
             padding: 3rem;
         }
 
@@ -513,37 +512,6 @@
             display: block;
             margin: 0 auto;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                padding: 1.5rem 0.75rem;
-            }
-            
-            .logo span, .nav-item span:not(.icon), .donate-link span:not(.icon) {
-                display: none;
-            }
-            
-            .nav-item {
-                justify-content: center;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-                padding: 1.5rem 1rem;
-            }
-
-            .page-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-
-            .tasks-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
@@ -598,33 +566,25 @@
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo">
-                <div class="logo-icon">⚡</div>
-                <span>Focus Forge</span>
-            </div>
+            <div class="logo-icon">⚡</div>
             
             <nav class="nav-menu">
                 <a href="index.html" class="nav-item">
                     <span class="icon">⏳</span>
-                    <span>Timer</span>
                 </a>
                 <div class="nav-item active">
                     <span class="icon">☑️</span>
-                    <span>Tasks</span>
                 </div>
                 <a href="planner.html" class="nav-item">
                     <span class="icon">📅</span>
-                    <span>Calendar</span>
                 </a>
                 <a href="analytics.html" class="nav-item">
                     <span class="icon">📊</span>
-                    <span>Analytics</span>
                 </a>
             </nav>
             
             <div class="donate-link" onclick="openDonateModal()">
                 <span>❤️</span>
-                <span>Donate</span>
             </div>
         </aside>
 
